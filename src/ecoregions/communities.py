@@ -53,6 +53,9 @@ def load_rules(path: Path) -> dict:
     doc = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     for inc in doc.pop("include", []):  # a shared rule file first: its communities, types and fallbacks, then this file's
         base = load_rules(Path(path).parent / inc)
+        if same := set(base.get("ecoregion_types", {})) & set(doc.get("ecoregion_types", {})):
+            # one name, colour and RESOLVE list per type world-wide, or a type is named differently across a border
+            raise ValueError(f"{path} redefines types of {inc}: {sorted(same)}; edit them in {inc}")
         doc["communities"] = base["communities"] + doc.get("communities", [])
         doc["ecoregion_types"] = {**base.get("ecoregion_types", {}), **doc.get("ecoregion_types", {})}
         doc["fallback"] = {**base["fallback"], **doc.get("fallback", {})}

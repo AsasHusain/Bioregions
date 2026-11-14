@@ -43,6 +43,7 @@ STAGES = {
     "crosscheck": "ecoregions.crosscheck",
     "package": "ecoregions.package",
     "join": "ecoregions.join",
+    "bordercheck": "ecoregions.bordercheck",
     "webmap": "ecoregions.webmap",
     "staticmap": "ecoregions.staticmap",
 }

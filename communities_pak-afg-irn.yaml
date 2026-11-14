@@ -1034,45 +1034,31 @@ communities:
   ecoregion: tugai
   name: Tugai riparian forest
   group: Riparian forest (tugai)
-  indicators:
-  - Populus euphratica
-  - Tamarix ramosissima
-  - Elaeagnus angustifolia
-  - Erianthus ravennae
+  indicators: [Populus euphratica, Populus pruinosa, Erianthus ravennae, Halimodendron halodendron, Periploca graeca]
   where:
-    hand:
-    - active_floodplain
-    river_km:
-    - null
-    - 5
-    elev:
-    - null
-    - 1500
-    province:
-    - '23'
-    - '24'
-    - '25'
-    - '26'
-    - '37'
-  note: Amu Darya, Kunduz, Hari Rud, Helmand and Arghandab floodplains.
+    province: ['23', '24', '25', '26', '27', '29', '37', '40', '43', '44', '45', '46', '48', '51', '52', '53', '54', '73', '74', '75']
+    hand: [active_floodplain, meander_floodplain]
+    river_km: [null, 5]
+    elev: [null, 1500]
+    bio12: [null, 600]
+  note: >-
+    Floodplains of the Amu Darya, Syr Darya, Zeravshan, Murgab, Tejen-Hari Rud, Helmand, Atrek, Aras and Kura. One
+    definition on both banks (2026-11-14): the Afghan, Central Asian and Kura rules differed in floodplain width and
+    the Iranian Aras and Atrek had none, so the type changed at the border rivers.
   priority: 80
 - id: amu_loess_steppe
   structure: grassland
-  ecoregion: amu_darya
-  name: Amu Darya loess semi-savanna
+  ecoregion: ca_semisavanna
+  name: Turanian loess piedmont semi-savanna (Poa bulbosa and Carex pachystylis)
   group: Desert (ephemeral grass steppe)
-  indicators:
-  - Poa bulbosa
-  - Carex pachystylis
-  - Artemisia turanica
-  - Ferula foetida
+  indicators: [Poa bulbosa, Carex pachystylis, Psoralea drupacea, Ferula foetida]
   where:
-    province:
-    - '23'
-    elev:
-    - null
-    - 900
-  note: Poa bulbosa-Carex pachystylis semi-savanna on the loess plains of northern Afghanistan.
+    province: ['23', '24', '45', '46', '47', '48', '49', '52', '53', '54', '55']
+    elev: [250, 1100]
+    bio12: [180, 450]
+  note: >-
+    Ephemeroid semi-savanna on loess, northern Afghanistan to the Fergana Valley (Freitag 1971; Korovin 1961; Walter &
+    Box 1983). One rule and one type on both banks of the Amu Darya (2026-11-14).
   priority: 30
 - id: amu_sand_desert
   structure: sparse
@@ -1094,26 +1080,15 @@ communities:
   ecoregion: pistachio
   name: Pistachio (Pistacia vera) open woodland
   group: Xeric woodland (pistachio savanna)
-  indicators:
-  - Pistacia vera
-  - Amygdalus spinosissima
-  - Cercis griffithii
-  - Ferula assa-foetida
+  indicators: [Pistacia vera, Amygdalus spinosissima, Cercis griffithii, Ferula assa-foetida, Prunus spinosissima, Amygdalus bucharica]
   where:
-    province:
-    - '22'
-    - '23'
-    - '24'
-    elev:
-    - 600
-    - 1800
-    bio12:
-    - 250
-    - 650
-    slope:
-    - 4
-    - null
-  note: Badghis, Samangan and the northern foothills of the Hindu Kush and Paropamisus.
+    province: ['22', '23', '24', '37', '47', '52', '55']
+    elev: [500, 1800]
+    bio12: [180, 650]
+    slope: [4, null]
+  note: >-
+    Paropamisus, Badkhyz, Khorasan, Kopet Dagh and the Pamir-Alay foothills; the union of the published ranges (Freitag
+    1971; Popov 1994; Djamali et al. 2012). One rule across the area seams (2026-11-14): the separate Afghan, Khorasan and Central Asian rules switched type at the province edge on the border.
   priority: 50
 - id: plateau_artemisia
   structure: shrubland
@@ -1137,31 +1112,18 @@ communities:
 - id: afghan_juniper
   structure: woodland_conifer
   ecoregion: juniper
-  name: Afghan juniper woodland
+  name: Irano-Turanian juniper woodland
   group: Xeric woodland (juniper)
-  indicators:
-  - Juniperus excelsa subsp. polycarpos
-  - Juniperus seravschanica
-  - Lonicera nummulariifolia
+  indicators: [Juniperus excelsa subsp. polycarpos, Juniperus seravschanica, Lonicera nummulariifolia, Cotoneaster nummularius]
   where:
-    province:
-    - '22'
-    - '23'
-    - '24'
-    elev:
-    - 1900
-    - 3300
-    bio12:
-    - 300
-    - null
-    slope:
-    - 8
-    - null
-    northness:
-    - 0
-    - null
-  note: north-facing slopes of the Paropamisus, Hazarajat and the northern Hindu Kush foothills.
-  priority: 52
+    province: ['22', '23', '24', '27', '28', '37']
+    elev: [1500, 3300]
+    bio12: [250, null]
+    slope: [8, null]
+  note: >-
+    Paropamisus, Hazarajat, Alborz, Kopet Dagh and Khorasan; J. excelsa subsp. polycarpos and J. seravschanica.
+    One rule across the area seams (2026-11-14): the separate Afghan, Khorasan and Central Asian rules switched type at the province edge on the border.
+  priority: 50
 - id: thorn_cushion_steppe
   structure: shrubland
   ecoregion: thorn_cushion
@@ -1545,34 +1507,6 @@ communities:
     hyrcanian_lowland_forest). 900 m covers the loess hills toward the Kopet Dagh. UNCERTAIN: PNV of the loess plain is debated
     (Poa-Carex semi-savanna vs Artemisia steppe); now almost all farmland.'
   priority: 48
-- id: alborz_juniper
-  structure: woodland_conifer
-  ecoregion: juniper
-  name: Alborz and Kopet Dagh juniper woodland
-  group: Irano-Turanian xerophilous juniper woodland
-  indicators:
-  - Juniperus excelsa subsp. polycarpos
-  - Lonicera nummulariifolia
-  - Cotoneaster nummularius
-  - Berberis integerrima
-  where:
-    province:
-    - '27'
-    - '28'
-    - '37'
-    elev:
-    - 1500
-    - 2800
-    bio12:
-    - 250
-    - 700
-    slope:
-    - 8
-    - null
-  calibrate: South slope of the central Alborz (Firuzkuh, Shahrestanak), the dry eastern Alborz and Golestan (Chaharbagh,
-    Golestan NP), Kopet Dagh, Binalud and Hezar Masjed at ~1,500-2,800 m (Sagheb-Talebi et al. 2014; Akhani 1998; Memariani
-    et al. 2016). bio12 cap 700 leaves the humid north slope to beech; 250 = drier than Mashhad-Bojnurd piedmont slopes support.
-  priority: 53
 - id: iran_montane_artemisia
   structure: shrubland
   ecoregion: artemisia
@@ -1782,31 +1716,18 @@ communities:
 - id: zagros_brantii_oak
   structure: woodland_broadleaf
   ecoregion: zagros_oak
-  name: Zagros Persian oak woodland
-  group: Kurdo-Zagrosian forest (Q. brantii)
-  indicators:
-  - Quercus brantii
-  - Pistacia atlantica
-  - Acer monspessulanum
-  - Crataegus azarolus
-  - Lonicera nummulariifolia
+  name: Zagros and eastern Anatolian oak woodland (Quercus brantii, Q. libani, Q. infectoria)
+  group: Kurdo-Zagrosian forest
+  indicators: [Quercus brantii, Quercus libani, Pistacia atlantica, Acer monspessulanum, Lonicera nummulariifolia]
   where:
-    province:
-    - '30'
-    - '31'
-    elev:
-    - 800
-    - 2500
-    bio12:
-    - 380
-    - null
-    slope:
-    - 2
-    - null
-  calibrate: 'The main Zagros forest, ~800-2,500 m (locally 700-2,700), at ~400-800 mm (Sagheb-Talebi et al. 2014: Zagros
-    forests 400-800 mm, down to ~350 mm in Fars; Frey & Probst 1986). Lower limit near Khorramabad (1,150 m, 500 mm) is well
-    inside; Shiraz (330 mm) is outside. slope >= 2 leaves the cold-air basin floors (Kermanshah, Hamadan, Shahrekord) to steppe.'
-  priority: 50
+    province: ['30', '31', '68', '69']
+    elev: [800, 2500]
+    bio12: [380, null]
+    slope: [2, null]
+  note: >-
+    Zagros to the Southeast Taurus and eastern Anatolia (Zohary 1973; Mayer & Aksoy 1986). One rule across the
+    Iran-Turkey border (2026-11-14).
+  priority: 46
 - id: zagros_juniper
   structure: woodland_conifer
   ecoregion: juniper
@@ -1961,33 +1882,6 @@ communities:
     and the central, Kerman, Khorasan and eastern ranges (Birjand, Taftan). Bazman/Taftan flanks (CHELSA 180 mm) set the floor.
     Oak wins above 380 mm.'
   priority: 47
-- id: khorasan_pistachio
-  structure: woodland_broadleaf
-  ecoregion: pistachio
-  name: Khorasan wild pistachio (Pistacia vera) woodland
-  group: Xeric woodland (pistachio savanna)
-  indicators:
-  - Pistacia vera
-  - Prunus spinosissima
-  - Cercis griffithii
-  - Ferula assa-foetida
-  where:
-    province:
-    - '37'
-    elev:
-    - 500
-    - 1400
-    bio12:
-    - 180
-    - 400
-    slope:
-    - 4
-    - null
-  calibrate: 'Sarakhs, Kalat-e Naderi and Khajeh Kalat foothills, ~600-1,300 m, the western end of the Badghis pistachio belt
-    (Memariani et al. 2016; Sagheb-Talebi et al. 2014). Sarakhs CHELSA 190 mm. RISK: wild P. vera is confined to the NE corner
-    of I12; the rule will spread it to every dry foothill in I12. A sub-province or a river_km/longitude proxy is needed.
-    Cercis griffithii in Iran: verify.'
-  priority: 50
 - id: iran_sieberi_steppe
   structure: shrubland
   ecoregion: artemisia
@@ -2454,8 +2348,20 @@ ecoregion_types:
     - Mesopotamian shrub desert
     - Tigris-Euphrates alluvial salt marsh
     - Kopet Dag semi-desert
+  ca_semisavanna:
+    name: Middle Asian Foothill Semi-savannas
+    biome: Temperate Grasslands, Savannas & Shrublands
+    color: '#d4c47a'
+    resolve:
+    - Alai-Western Tian Shan steppe
+    - Kopet Dag semi-desert
+    - Tian Shan foothill arid steppe
+    - Gissaro-Alai open woodlands
+    - Badghyz and Karabil semi-desert
+    - Paropamisus xeric woodlands
+    - Central Asian southern desert
   amu_darya:
-    name: Amu Darya Loess Steppe & Sand Desert
+    name: Turanian Sand Deserts
     biome: Deserts & Xeric Shrublands
     color: '#cdb98f'
     resolve:
@@ -2463,8 +2369,10 @@ ecoregion_types:
     - Paropamisus xeric woodlands
     - Afghan Mountains semi-desert
     - Gissaro-Alai open woodlands
+    - Central Asian southern desert
+    - Central Asian northern desert
   pistachio:
-    name: Paropamisus Pistachio Woodlands
+    name: Middle Asian Pistachio Woodlands
     biome: Deserts & Xeric Shrublands
     color: '#b08d57'
     resolve:
@@ -2476,7 +2384,7 @@ ecoregion_types:
     - Kopet Dag woodlands and forest steppe
     - Kopet Dag semi-desert
   thorn_cushion:
-    name: Iranian Plateau Thorn-Cushion Steppe
+    name: Mountain Thorn-Cushion Steppe
     biome: Montane Grasslands & Shrublands
     color: '#c9a9a6'
     resolve:
@@ -2490,6 +2398,8 @@ ecoregion_types:
     - Kopet Dag woodlands and forest steppe
     - Kuh Rud and Eastern Iran montane woodlands
     - Central Persian desert basins
+    - Southern Anatolian montane conifer and deciduous forests
+    - Central Anatolian steppe
   helmand:
     name: Helmand Basin Deserts & Hamuns
     biome: Deserts & Xeric Shrublands

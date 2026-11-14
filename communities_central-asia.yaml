@@ -97,21 +97,6 @@ communities:
     elev: [null, -10]
     slope: [null, 1]
   priority: 70
-- id: ca_tugai
-  structure: forest_broadleaf
-  ecoregion: tugai
-  name: Central Asian tugai riparian forest
-  group: Riparian forest (tugai)
-  indicators: [Populus euphratica, Populus pruinosa, Erianthus ravennae, Halimodendron halodendron]
-  # not Tamarix ramosissima (every desert wash and solonchak) or Elaeagnus angustifolia (planted windbreaks): development
-  # records put 77 and 40 of them outside tugai, in desert, steppe and juniper units (2026-11-14)
-  where:
-    province: ['40', '43', '44', '45', '46', '48', '51', '52', '53', '54']
-    hand: [active_floodplain, meander_floodplain]
-    river_km: [null, 3]
-    elev: [null, 1200]
-  note: Amu Darya, Syr Darya, Zeravshan, Murgab, Tejen, Vakhsh, Kafirnigan, Surkhandarya and Chuy floodplains.
-  priority: 80
 - id: ca_delta_reed
   structure: wetland
   ecoregion: tugai
@@ -123,31 +108,6 @@ communities:
     hand: [active_floodplain]
     creek_m: [null, 1000]
   priority: 82
-- id: ca_loess_semisavanna
-  structure: grassland
-  ecoregion: ca_semisavanna
-  name: Turanian loess piedmont semi-savanna (Poa bulbosa and Carex pachystylis)
-  group: Desert (ephemeral grass steppe)
-  indicators: [Poa bulbosa, Carex pachystylis, Psoralea drupacea, Ferula foetida]
-  where:
-    province: ['24', '45', '46', '47', '48', '49', '52', '53', '54', '55']   # 24: Badkhyz and Karabil (fallback filled 42,000 km2 at 360-810 m)
-    elev: [250, 1100]
-    bio12: [180, 450]
-  note: The adyr and loess foothill belt (Walter & Box 1983), continuous with the Afghan Amu Darya loess steppe.
-  priority: 30
-- id: ca_pistachio
-  structure: woodland_broadleaf
-  ecoregion: pistachio
-  name: Middle Asian wild pistachio open woodland
-  group: Xeric woodland (pistachio savanna)
-  indicators: [Pistacia vera, Amygdalus bucharica, Cercis griffithii, Ferula tadshikorum]
-  where:
-    province: ['47', '52', '55']
-    elev: [600, 1500]
-    bio12: [250, 600]
-    slope: [5, null]
-  note: Babatag, Kugitang, Vakhsh and Kafirnigan foothills, southern Gissar.
-  priority: 50
 - id: ca_alay_shrubland
   structure: woodland_broadleaf
   ecoregion: alay_woodland
@@ -281,24 +241,6 @@ communities:
   priority: 99
 
 ecoregion_types:
-  amu_darya:   # extends from northern Afghanistan across the Turan lowland
-    name: Turanian Sand Deserts & Loess Steppe
-    biome: Deserts & Xeric Shrublands
-    color: '#d8b98a'
-    resolve: [Central Asian southern desert, Badghyz and Karabil semi-desert, Central Asian northern desert]
-  ca_semisavanna:   # 2026-11-14: split from amu_darya after the first audit, which joined the Karakum, the Kyzylkum and
-    # the loess foothills from the Kopet Dagh to the Fergana Valley into one 506,000 km2 unit; the ephemeroid
-    # semi-savanna on loess (adyr) is a zone of its own in Central Asia (Korovin 1961; Walter & Box 1983), as in RESOLVE
-    name: Middle Asian Foothill Semi-savannas
-    biome: Temperate Grasslands, Savannas & Shrublands
-    color: '#d4c47a'
-    resolve: [Alai-Western Tian Shan steppe, Kopet Dag semi-desert, Tian Shan foothill arid steppe, Gissaro-Alai open woodlands,
-              Badghyz and Karabil semi-desert]
-  pistachio:
-    name: Middle Asian Pistachio Woodlands
-    biome: Deserts & Xeric Shrublands
-    color: '#b39b5e'
-    resolve: [Paropamisus xeric woodlands, Badghyz and Karabil semi-desert, Gissaro-Alai open woodlands]
   turan_clay:
     name: Turanian Gypsum & Clay Deserts
     biome: Deserts & Xeric Shrublands
@@ -347,13 +289,13 @@ fallback:
   '43': ca_sand_desert
   '44': ca_halophyte
   '45': ca_sand_desert
-  '46': ca_loess_semisavanna
+  '46': amu_loess_steppe
   '47': ca_mountain_steppe
-  '48': ca_loess_semisavanna
+  '48': amu_loess_steppe
   '49': ca_mountain_steppe
   '50': ca_mountain_steppe
   '51': ca_mountain_steppe
-  '52': ca_loess_semisavanna
-  '53': ca_loess_semisavanna
+  '52': amu_loess_steppe
+  '53': amu_loess_steppe
   '54': ca_black_saxaul
-  '55': ca_loess_semisavanna
+  '55': amu_loess_steppe

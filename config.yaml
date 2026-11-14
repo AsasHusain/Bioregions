@@ -136,9 +136,9 @@ hydrology:
 provinces:
   alpha: 40.0
   smooth_cells: 3              # Gaussian sigma (810 m cells) applied to features before differencing
-  # Trunk rivers act as barriers between provinces (a doab or a trans-Indus plain
-  # should not leak across the Indus): extra cost, in km-equivalents, to enter a channel cell.
-  river_barrier: {min_upland_km2: 30000, cost_km: 60}
+  # No river barrier (2026-11-14): trunk rivers once cost 60 km-equivalents to cross, which put province edges, and
+  # every province-keyed rule, on the Hari Rud, Amu Darya, Panj and Aras, all international borders. A river does not
+  # separate vegetation; the features on either bank do. (`river_barrier: {min_upland_km2, cost_km}` still works.)
   features: {elev: 1.0, relief5k: 1.2, relief1k: 0.8, slope: 0.8, rem: 0.6, dune_frac: 1.0, sand: 0.6,
              bio12: 0.6, bio1: 0.4, ai: 0.5, litho: 1.0}
 

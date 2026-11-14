@@ -113,19 +113,6 @@ communities:
     bio12: [450, null]
     slope: [3, null]
   priority: 45
-- id: cau_eastern_oak
-  structure: woodland_broadleaf
-  ecoregion: zagros_oak
-  name: Eastern Anatolian Brant's and Lebanon oak woodland
-  group: Deciduous oak woodland (Zagros type)
-  indicators: [Quercus brantii, Quercus libani, Quercus infectoria, Pistacia atlantica]
-  where:
-    province: ['68', '69']
-    elev: [800, 1900]
-    bio12: [450, null]
-    slope: [5, null]
-  note: The Southeastern Taurus, continuous with the Zagros oak belt (RESOLVE Eastern Anatolian deciduous forests).
-  priority: 46
 - id: cau_upper_mesopotamia
   structure: grassland
   ecoregion: upper_mesopotamia
@@ -333,25 +320,7 @@ communities:
     hand: [active_floodplain]
     river_km: [3, null]
   priority: 78
-- id: cau_kura_floodplain
-  structure: forest_broadleaf
-  ecoregion: tugai
-  name: Kura and Araxes floodplain forest
-  group: Riparian forest
-  indicators: [Populus nigra, Tamarix ramosissima, Periploca graeca, Elaeagnus angustifolia]
-  where:
-    province: ['73', '74', '75']
-    hand: [active_floodplain, meander_floodplain]
-    river_km: [null, 3]
-    elev: [null, 500]
-  priority: 80
-
 ecoregion_types:
-  thorn_cushion:   # extends from the Iranian plateau to the Taurus and the Armenian Highland
-    name: Mountain Thorn-Cushion Steppe
-    biome: Montane Grasslands & Shrublands
-    color: '#b5a088'
-    resolve: [Eastern Anatolian montane steppe, Southern Anatolian montane conifer and deciduous forests, Central Anatolian steppe]
   med_sclerophyll:
     name: Eastern Mediterranean Maquis
     biome: Mediterranean Forests, Woodlands & Scrub
