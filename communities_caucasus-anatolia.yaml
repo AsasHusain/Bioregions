@@ -228,7 +228,7 @@ communities:
   group: Beech forest
   indicators: [Fagus orientalis, Acer velutinum, Carpinus betulus, Ilex colchica]
   where:
-    province: ['71', '72']
+    province: ['71', '72', '73']
     elev: [900, 1900]
     bio12: [700, null]
     slope: [5, null]
@@ -240,7 +240,7 @@ communities:
   group: Subalpine woodland and tall herbs
   indicators: [Betula litwinowii, Rhododendron caucasicum, Sorbus aucuparia, Heracleum sosnowskyi]
   where:
-    province: ['66', '70', '71', '72']
+    province: ['66', '70', '71', '72', '73']
     elev: [1900, 2500]
     bio12: [600, null]
   priority: 60
@@ -282,7 +282,7 @@ communities:
   group: Mountain steppe
   indicators: [Festuca valesiaca, Koeleria macrantha, Stipa tirsa, Thymus kotschyanus]
   where:
-    province: ['68', '72', '75']
+    province: ['68', '72', '73', '75']   # 73: the Shamakhi and Ismayilli mountains (Kura semi-desert fallback reached 1,480 m)
     elev: [1400, 2500]
     bio12: [250, 700]   # 250 (was 300): Nakhchivan's mountain steppes, which fell back to semi-desert up to 2,580 m
   priority: 40
