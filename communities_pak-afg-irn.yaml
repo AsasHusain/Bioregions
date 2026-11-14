@@ -2640,6 +2640,7 @@ ecoregion_types:
     resolve:
     - Zagros Mountains forest steppe
     - Eastern Anatolian montane steppe
+    - Eastern Anatolian deciduous forests     # the oak forests of eastern Anatolia (audit only)
   zagros_steppe:
     name: Zagros Montane Steppe
     biome: Temperate Grasslands, Savannas & Shrublands

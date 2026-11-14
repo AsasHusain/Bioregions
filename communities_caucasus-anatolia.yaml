@@ -55,6 +55,19 @@ communities:
     bio12: [450, null]
     slope: [5, null]
   priority: 55
+- id: cau_taurus_juniper
+  structure: woodland_conifer
+  ecoregion: taurus_conifer
+  name: Taurus juniper and black pine open forest
+  group: Mediterranean montane conifer forest
+  indicators: [Juniperus excelsa, Juniperus foetidissima, Pinus nigra, Quercus cerris]
+  where:
+    province: ['61', '62', '63']
+    elev: [1150, 2100]
+  note: >-
+    Drier interior slopes and plateaus of the Taurus above the brutia pine belt (Mayer & Aksoy 1986). Added 2026-11-14:
+    the first audit found 19,500 km2 at 890-1,730 m in province 62 filled by the brutia pine fallback.
+  priority: 30
 - id: cau_thorn_cushion
   structure: shrubland
   ecoregion: thorn_cushion
@@ -62,7 +75,7 @@ communities:
   group: Thorn-cushion steppe (tragacanth)
   indicators: [Astragalus microcephalus, Acantholimon acerosum, Onobrychis cornuta, Festuca oreophila]
   where:
-    province: ['61', '62', '64', '67', '68', '72']
+    province: ['61', '62', '64', '67', '68', '72', '75']   # 75: Ararat and the Zangezur slopes of Nakhchivan (2026-11-14)
     elev: [2100, 3300]
   priority: 58
 # ---- Central and southeastern Anatolia
@@ -143,7 +156,7 @@ communities:
   group: Beech forest
   indicators: [Fagus orientalis, Acer cappadocicum, Epimedium pubigerum, Trachystemon orientalis]
   where:
-    province: ['65', '66', '70']
+    province: ['60', '65', '66', '70']   # 60: Uludag and the Strandja (fallback reached 1,490 m)
     elev: [600, 1700]
     bio12: [800, null]
     slope: [5, null]
@@ -166,7 +179,7 @@ communities:
   group: Montane conifer forest
   indicators: [Picea orientalis, Abies nordmanniana, Vaccinium arctostaphylos, Rhododendron ponticum]
   where:
-    province: ['65', '66', '70', '71', '72']
+    province: ['60', '65', '66', '70', '71', '72']
     elev: [1200, 2200]
     bio12: [900, null]
     slope: [8, null]
@@ -203,7 +216,7 @@ communities:
   group: Mesophytic deciduous forest (Caucasus)
   indicators: [Quercus petraea subsp. iberica, Carpinus betulus, Carpinus orientalis, Acer campestre]
   where:
-    province: ['71', '72', '74']
+    province: ['71', '72', '73', '74']   # 73: the Kura's moister foothills (fallback semi-desert reached 1,370 m)
     elev: [400, 1400]
     bio12: [500, null]
     slope: [3, null]
@@ -238,7 +251,7 @@ communities:
   group: Alpine meadow
   indicators: [Festuca varia, Alchemilla caucasica, Gentiana septemfida, Carex tristis]
   where:
-    province: ['66', '68', '71', '72']
+    province: ['66', '68', '70', '71', '72', '75']   # 70 Adjara, 75 Ararat and Zangezur (2026-11-14)
     elev: [2400, 3400]
     bio12: [500, null]
   priority: 62
@@ -259,7 +272,7 @@ communities:
   group: Nival
   indicators: [Saxifraga flagellaris]
   where:
-    province: ['66', '68', '72']
+    province: ['66', '68', '72', '75']
     elev: [3800, null]
   priority: 99
 - id: cau_highland_steppe
@@ -271,14 +284,15 @@ communities:
   where:
     province: ['68', '72', '75']
     elev: [1400, 2500]
-    bio12: [300, 700]
+    bio12: [250, 700]   # 250 (was 300): Nakhchivan's mountain steppes, which fell back to semi-desert up to 2,580 m
   priority: 40
 - id: cau_arid_open_woodland
   structure: woodland_broadleaf
   ecoregion: caucasus_xeric
   name: Caucasian arid open woodland (Pistacia mutica and juniper)
   group: Xeric open woodland
-  indicators: [Pistacia mutica, Juniperus foetidissima, Celtis glabrata, Paliurus spina-christi]
+  indicators: [Pistacia mutica, Rhamnus pallasii, Celtis caucasica, Spiraea hypericifolia]  # 2026-11-14: Paliurus spina-christi and
+  # Juniperus foetidissima dropped (first audit: they occur across Anatolia and made this type every unit's rival)
   where:
     province: ['72', '73', '74', '75']
     elev: [400, 1300]
@@ -292,7 +306,7 @@ communities:
   group: Semi-desert
   indicators: [Artemisia lerchiana, Salsola dendroides, Salsola nodulosa, Petrosimonia brachiata]
   where:
-    province: ['73', '74']
+    province: ['72', '73', '74']   # 72: the Karabakh and Gazakh lowlands (fallback was highland steppe at 340 m)
     elev: [null, 600]
     bio12: [null, 350]
   priority: 35
