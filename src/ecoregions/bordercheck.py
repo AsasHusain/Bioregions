@@ -59,43 +59,61 @@ def check(regions: gpd.GeoDataFrame, countries: gpd.GeoDataFrame, tol_km=3.0, mi
                 boundary_km=bound.length / 1000, stretches=stretches(bound, borders, tol_km * 1000, min_km * 1000))
 
 
+def side_points(lines, off_m: float, step_m: float, min_len=0.0):
+    """Points ``off_m`` either side of ``lines``, every ``step_m`` along each part at least ``min_len`` long
+    (two (n, 2) arrays), computed with shapely's array functions."""
+    a, b = [], []
+    for ln in shapely.get_parts(lines):
+        if ln.geom_type != "LineString" or ln.length < max(min_len, step_m):
+            continue
+        d = np.arange(step_m / 2, ln.length - step_m / 2, step_m)
+        if not len(d):
+            continue
+        p, q, m = (shapely.get_coordinates(shapely.line_interpolate_point(ln, d + k)) for k in (-50.0, 50.0, 0.0))
+        n = np.stack([-(q[:, 1] - p[:, 1]), q[:, 0] - p[:, 0]], axis=1)
+        n /= np.maximum(np.hypot(n[:, 0], n[:, 1]), 1e-9)[:, None]
+        a.append(m + off_m * n)
+        b.append(m - off_m * n)
+    return (np.vstack(a), np.vstack(b)) if a else (np.empty((0, 2)), np.empty((0, 2)))
+
+
+def pixels(a, b, transform, shape):
+    """Row/column of the point pairs ``a``, ``b`` where both fall inside a raster of ``shape``."""
+    inv = ~transform
+    c1, r1 = inv * (a[:, 0], a[:, 1])
+    c2, r2 = inv * (b[:, 0], b[:, 1])
+    r1, c1, r2, c2 = (np.floor(np.asarray(v)).astype(int) for v in (r1, c1, r2, c2))
+    ok = (r1 >= 0) & (r1 < shape[0]) & (c1 >= 0) & (c1 < shape[1]) & (r2 >= 0) & (r2 < shape[0]) & (c2 >= 0) & (c2 < shape[1])
+    return r1[ok], c1[ok], r2[ok], c2[ok]
+
+
 def contrast(lines, rasters: list, transform, step_m=2000.0, off_m=3000.0) -> float:
     """Median over points every ``step_m`` along ``lines`` of the summed relative difference of ``rasters`` (each
     scaled by its own spread) between the points ``off_m`` either side of the line."""
-    from shapely.geometry import LineString
-
-    inv = ~transform
-    diffs = []
-    for ln in getattr(lines, "geoms", [lines]):
-        if not isinstance(ln, LineString) or ln.length < 2 * step_m:
-            continue
-        for d in np.arange(step_m / 2, ln.length - step_m / 2, step_m):
-            p, q = ln.interpolate(d - 50), ln.interpolate(d + 50)
-            nx, ny = -(q.y - p.y), q.x - p.x
-            n = np.hypot(nx, ny) or 1.0
-            m = ln.interpolate(d)
-            sides = []
-            for sgn in (1, -1):
-                c, r = inv * (m.x + sgn * off_m * nx / n, m.y + sgn * off_m * ny / n)
-                sides.append((int(r), int(c)))
-            v = 0.0
-            for a, spread in rasters:
-                (r1, c1), (r2, c2) = sides
-                if not (0 <= r1 < a.shape[0] and 0 <= c1 < a.shape[1] and 0 <= r2 < a.shape[0] and 0 <= c2 < a.shape[1]):
-                    v = np.nan
-                    break
-                v += abs(float(a[r1, c1]) - float(a[r2, c2])) / spread
-            diffs.append(v)
-    return float(np.nanmedian(diffs)) if diffs else np.nan
+    a, b = side_points(lines, off_m, step_m, min_len=2 * step_m)
+    if not len(a):
+        return np.nan
+    r1, c1, r2, c2 = pixels(a, b, transform, rasters[0][0].shape)
+    if not len(r1):
+        return np.nan
+    v = sum(np.abs(arr[r1, c1].astype("float64") - arr[r2, c2]) / spread for arr, spread in rasters)
+    return float(np.nanmedian(v)) if np.isfinite(v).any() else np.nan
 
 
 def _rasters(paths, grid, f=3):
-    """dem and annual rainfall every ``f``-th cell (270 m is plenty for a 3 km offset), each with its p90-p10 spread."""
+    """What makes a natural break, every ``f``-th cell (270 m is plenty for a 3 km offset), each with its p90-p10
+    spread: elevation, annual rainfall, soil sand (a dune field's edge on a flat plain) and height above the nearest
+    channel (log; a floodplain's edge). Elevation and rainfall alone took the edges of the Thar and of the Indus
+    floodplain for arbitrary lines."""
     from .grid import read
 
     out = []
-    for name in ("dem", "clim_bio12"):
+    for name in ("dem", "clim_bio12", "soil_sand", "hand"):
+        if not paths.raster(name).exists():
+            continue
         a = read(paths.raster(name))[::f, ::f].astype("float32")
+        if name == "hand":
+            a = np.log1p(np.clip(a, 0, None))
         out.append((a, float(np.nanpercentile(a, 90) - np.nanpercentile(a, 10)) or 1.0))
     return out, grid.transform * grid.transform.scale(f, f)
 
@@ -268,35 +286,22 @@ COMPILED = ("litho_", "age", "clay", "sand", "ph", "soc", "dune_frac")
 
 def border_pairs(line, off=10000.0, step=5000.0):
     """Point pairs ``off`` m either side of ``line``, every ``step`` m."""
-    a, b = [], []
-    for ln in getattr(line, "geoms", [line]):
-        for d in np.arange(step / 2, ln.length - step / 2, step):
-            p, q, m = ln.interpolate(d - 50), ln.interpolate(d + 50), ln.interpolate(d)
-            nx, ny = -(q.y - p.y), q.x - p.x
-            n = np.hypot(nx, ny) or 1.0
-            a.append((m.x + off * nx / n, m.y + off * ny / n))
-            b.append((m.x - off * nx / n, m.y - off * ny / n))
-    return np.array(a).reshape(-1, 2), np.array(b).reshape(-1, 2)
+    return side_points(line, off, step)
 
 
 def seam(arr, transform, line, shifts) -> tuple[float, list[float]]:
     """Mean absolute difference of ``arr`` across ``line`` and across the line moved by each of ``shifts``."""
-    inv = ~transform
+    px = [pixels(*border_pairs(ln), transform, arr.shape) for ln in [line] + [affinity.translate(line, dx, dy) for dx, dy in shifts]]
+    d = [mean_diff(arr, p) for p in px]
+    return d[0], d[1:]
 
-    def diff(ln):
-        a, b = border_pairs(ln)
-        if not len(a):
-            return np.nan
-        out = []
-        for (x1, y1), (x2, y2) in zip(a, b):
-            c1, r1 = inv * (x1, y1)
-            c2, r2 = inv * (x2, y2)
-            r1, c1, r2, c2 = int(r1), int(c1), int(r2), int(c2)
-            if 0 <= r1 < arr.shape[0] and 0 <= c1 < arr.shape[1] and 0 <= r2 < arr.shape[0] and 0 <= c2 < arr.shape[1]:
-                out.append(abs(float(arr[r1, c1]) - float(arr[r2, c2])))
-        return float(np.nanmean(out)) if out and np.isfinite(out).any() else np.nan
 
-    return diff(line), [diff(affinity.translate(line, dx, dy)) for dx, dy in shifts]
+def mean_diff(arr, px) -> float:
+    r1, c1, r2, c2 = px
+    if not len(r1):
+        return np.nan
+    v = np.abs(arr[r1, c1].astype("float64") - arr[r2, c2])
+    return float(np.nanmean(v)) if np.isfinite(v).any() else np.nan
 
 
 def input_seams(cfg, names, runs=20, seed=1, level=20) -> tuple[list[dict], dict]:
@@ -317,6 +322,13 @@ def input_seams(cfg, names, runs=20, seed=1, level=20) -> tuple[list[dict], dict
     cty = cty[cty.intersects(area)]
     rng = np.random.default_rng(seed)
     rows, lines = [], {}
+    cache: dict[str, np.ndarray] = {}
+
+    def layer(name):
+        if name not in cache:
+            cache[name] = read(paths.coarse(name))
+        return cache[name]
+
     for i, x in enumerate(cty.ADM0_A3):
         for y in list(cty.ADM0_A3)[i + 1:]:
             A, B = cty[cty.ADM0_A3 == x].union_all(), cty[cty.ADM0_A3 == y].union_all()
@@ -325,12 +337,14 @@ def input_seams(cfg, names, runs=20, seed=1, level=20) -> tuple[list[dict], dict
                 continue
             lines[f"{x}-{y}"] = line
             shifts = [(d * np.cos(t), d * np.sin(t)) for d, t in zip(rng.uniform(30000, 80000, runs), rng.uniform(0, 2 * np.pi, runs))]
+            px = [pixels(*border_pairs(ln), cg.transform, cg.shape)
+                  for ln in [line] + [affinity.translate(line, dx, dy) for dx, dy in shifts]]
             ratio = {}
             for name in ("elev", "bio12", "bio1", *names):
                 if name in ratio or not paths.coarse(name).exists() or (name not in ("elev", "bio12", "bio1")
                                                                          and not name.startswith(COMPILED)):
                     continue
-                obs, null = seam(read(paths.coarse(name)), cg.transform, line, shifts)
+                obs, *null = [mean_diff(layer(name), p) for p in px]
                 mean, mx = float(np.nanmean(null)), float(np.nanmax(null))
                 ratio[name] = obs / mean if mean > 0 else (np.inf if obs > 0 else 1.0)
                 if name in ("elev", "bio12", "bio1"):
