@@ -351,7 +351,10 @@ provinces:
       family: high_mountains
       # + Kars, Ardahan, and the Dmanisi and Tsalka plateaus, which continue Armenia's Lori plateau (province gate)
       seeds: [[43.6, 41.4], [44.8, 40.8], [45.3, 40.2], [46.4, 39.8], [44.2, 41.0], [45.6, 39.5], [43.1, 41.6],
-              [43.1, 40.6], [42.75, 41.1], [44.2, 41.35], [44.1, 41.6]]
+              [43.1, 40.6], [42.75, 41.1], [44.2, 41.35], [44.1, 41.6],
+              # + the Daralagez slopes above 2,100 m on both sides of the Armenia-Nakhchivan line, and the Sevan-
+              #   Murovdag crest above 2,500 m north of it (border-check fix)
+              [45.255, 39.625], [45.24, 39.55], [45.61, 40.425], [45.475, 40.485]]
     - code: "73"
       name: Kura Lowland (incl. Mugan, Mil & Shirvan)
       region: Caucasus
