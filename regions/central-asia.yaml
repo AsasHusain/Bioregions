@@ -81,6 +81,13 @@ sources:
         doi: 10.15468/dl.77g6hc        # Turkmenistan, Uzbekistan, Tajikistan, Kyrgyzstan plus 0.5 degrees; all taxa (sealed records filtered out)
         url: https://api.gbif.org/v1/occurrence/download/request/0007052-261110092616502.zip
         records: 833901
+# Border-gate exceptions, each reviewed on profiles of elevation, rainfall, sand, dunes and height above the channel
+# (also recorded in docs/ledger.md); the gate on the finished Floral Ecoregions still applies to every one
+bordercheck:
+  accept:
+    - {lat: 37.25, lon: 65.04, layer: provinces, reason: "margin of the Amu Darya valley floor (height above the channel 1.2 -> 0.2), along which the border was drawn"}
+    - {lat: 37.53, lon: 65.67, layer: provinces, reason: "the Amu Darya in its floodplain; tugai covers both banks in both provinces, so no type changes at the river"}
+
 provinces:
   drop_outside_seeds: true     # parcel: provinces seeded only outside it drop out
   units:
@@ -226,7 +233,10 @@ provinces:
       name: Caspian Lowlands & Northern Alborz (incl. the Gorgan Plain)
       region: Caspian & Alborz
       family: plains
-      seeds: [[49.6, 37.25], [50.3, 36.95], [51.3, 36.45], [52.4, 36.4], [53.3, 36.45], [54.55, 36.72], [55.1, 37.35], [48.65, 37.8]]
+      # + the Atrek delta salt marshes north of the river (Esenguly), the Gorgan plain's continuation; the edge with
+      # the Western Turkmen Lowlands stood on the Atrek, the border, where rainfall falls smoothly (province gate)
+      seeds: [[49.6, 37.25], [50.3, 36.95], [51.3, 36.45], [52.4, 36.4], [53.3, 36.45], [54.55, 36.72], [55.1, 37.35], [48.65, 37.8],
+              [54.0, 37.55], [54.6, 37.55]]
     - code: "28"
       name: Alborz (Crest & Southern Slope, incl. Damavand)
       region: Caspian & Alborz
@@ -353,12 +363,16 @@ provinces:
       name: Syr Darya Valley (incl. the Tashkent Oasis & Hungry Steppe)
       region: Turan Lowland
       family: plains
-      seeds: [[69.3, 41.2], [68.5, 40.55], [68.0, 40.85], [69.7, 40.8]]
+      # + the loess foothills (adyrs) south of Khujand, 1,100-1,800 m: the edge with the Alay Ranges stood in them on
+      # the Kyrgyz-Tajik border; the mountain front is 20 km south (2,725 -> 1,580 m at 39.65-39.70 N) (province gate)
+      seeds: [[69.3, 41.2], [68.5, 40.55], [68.0, 40.85], [69.7, 40.8], [69.33, 39.8]]
     - code: "54"
       name: Zeravshan & Kashkadarya Plains (Samarkand, Bukhara, Karshi)
       region: Turan Lowland
       family: plains
-      seeds: [[66.9, 39.6], [64.4, 39.8], [65.8, 38.9], [66.3, 39.2], [65.4, 40.1]]
+      # + the Karshi steppe terrace in Turkmenistan, east of the step down to the Amu Darya valley at 64.6 E
+      # (elevation 224 -> 275 m, height above the channel x10); the edge stood on the border (province gate)
+      seeds: [[66.9, 39.6], [64.4, 39.8], [65.8, 38.9], [66.3, 39.2], [65.4, 40.1], [64.75, 38.6]]
     - code: "55"
       name: Nuratau & Aktau Ranges (incl. Aydarkul)
       region: Turan Lowland

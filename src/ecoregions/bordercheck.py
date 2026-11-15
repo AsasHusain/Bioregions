@@ -100,22 +100,21 @@ def contrast(lines, rasters: list, transform, step_m=2000.0, off_m=3000.0) -> fl
     return float(np.nanmedian(v)) if np.isfinite(v).any() else np.nan
 
 
-def _rasters(paths, grid, f=3):
-    """What makes a natural break, every ``f``-th cell (270 m is plenty for a 3 km offset), each with its p90-p10
-    spread: elevation, annual rainfall, soil sand (a dune field's edge on a flat plain) and height above the nearest
-    channel (log; a floodplain's edge). Elevation and rainfall alone took the edges of the Thar and of the Indus
-    floodplain for arbitrary lines."""
+def _rasters(paths, grid):
+    """What makes a natural break, on the 270 m feature grid (ample for a 3 km offset),
+    each with its p90-p10 spread: elevation, annual rainfall, soil sand, height above the nearest channel (a
+    floodplain's edge) and dune texture (a sand sea's edge). Elevation and rainfall alone took the edges of the Thar,
+    the Indus floodplain and the Karakum for arbitrary lines. The compiled layers are those of the features stage,
+    already blended across source-map seams."""
     from .grid import read
 
+    cg = grid.coarsen(paths.cfg["grid"]["coarse_factor"])
     out = []
-    for name in ("dem", "clim_bio12", "soil_sand", "hand"):
-        if not paths.raster(name).exists():
-            continue
-        a = read(paths.raster(name))[::f, ::f].astype("float32")
-        if name == "hand":
-            a = np.log1p(np.clip(a, 0, None))
-        out.append((a, float(np.nanpercentile(a, 90) - np.nanpercentile(a, 10)) or 1.0))
-    return out, grid.transform * grid.transform.scale(f, f)
+    for name in ("elev", "bio12", "sand", "hand", "dune_frac"):
+        if paths.coarse(name).exists():
+            a = read(paths.coarse(name)).astype("float32")
+            out.append((a, float(np.nanpercentile(a, 90) - np.nanpercentile(a, 10)) or 1.0))
+    return out, cg.transform
 
 
 def pieces(lines, length_m: float, step_m=2000.0, max_n=60, seed=1) -> list:
@@ -130,7 +129,7 @@ def pieces(lines, length_m: float, step_m=2000.0, max_n=60, seed=1) -> list:
     return [out[i] for i in rng.permutation(len(out))[:max_n]]
 
 
-def judge(layer, regions, countries, rasters, tr, tol, min_km, prov=None) -> list[dict]:
+def judge(layer, regions, countries, rasters, tr, tol, min_km, prov=None, accept=()) -> list[dict]:
     """Every stretch of ``regions``' internal boundaries running ``min_km`` or more within ``tol`` km of an international
     border, with its verdict. With ``prov`` (province edges): a stretch mostly off them lies inside one province, where
     rules on terrain, climate and water draw the line. Otherwise it must be at least as sharp (terrain and rainfall
@@ -159,10 +158,15 @@ def judge(layer, regions, countries, rasters, tr, tol, min_km, prov=None) -> lis
         if prov is not None:
             near = prov.intersection(shapely.box(*st.buffer(tol * 2000).bounds))  # buffering all edges took hours
             on_prov = st.intersection(near.buffer(tol * 1000)).length / st.length
+        ok = [a for a in accept if a.get("layer", layer) == layer and abs(a["lat"] - m.y) < 0.2 and abs(a["lon"] - m.x) < 0.25]
         if prov is not None and on_prov < 0.5:
             verdict = "inside a province (terrain and climate)"
+        elif np.isfinite(c) and c >= bar:
+            verdict = "natural break"
+        elif ok:
+            verdict = "accepted: " + ok[0]["reason"]
         else:
-            verdict = "natural break" if np.isfinite(c) and c >= bar else "ARTEFACT"
+            verdict = "ARTEFACT"
         rows.append(dict(layer=layer, km=round(st.length / 1000), lat=round(m.y, 2), lon=round(m.x, 2),
                          on_province_edge=round(on_prov, 2), contrast=round(c, 2), typical=round(typical, 2),
                          bar=round(bar, 2), verdict=verdict))
@@ -201,7 +205,8 @@ def run(cfg) -> None:
     rows = []
     for layer in ("ecoregions", "faunal_regions"):
         regions = gpd.read_file(gpkg, layer=layer).to_crs(grid.crs)
-        rows += judge(layer, regions, countries, rasters, tr, tol, min_km, prov if layer == "ecoregions" else None)
+        rows += judge(layer, regions, countries, rasters, tr, tol, min_km, prov if layer == "ecoregions" else None,
+                      accept=bc.get("accept", []))
     pd.DataFrame(rows, columns=COLS).to_csv(paths.outputs / "bordercheck.csv", index=False)
     eco = gpd.read_file(gpkg, layer="ecoregions").to_crs(grid.crs)
     cuts(eco, prov, rasters, tr, min_km).to_csv(paths.qa / "province_cuts.csv", index=False)
@@ -270,7 +275,7 @@ def provinces(cfg, lab, pg, units) -> None:
     polys = [(shapely.geometry.shape(g), int(v)) for g, v in shapes(lab, mask=lab > 0, transform=pg.transform)]
     regions = gpd.GeoDataFrame({"code": [units[v - 1]["code"] for _, v in polys]}, geometry=[g for g, _ in polys],
                                crs=grid.crs).dissolve("code").reset_index()
-    rows = judge("provinces", regions, _countries(paths, grid.crs), rasters, tr, tol, min_km)
+    rows = judge("provinces", regions, _countries(paths, grid.crs), rasters, tr, tol, min_km, accept=bc.get("accept", []))
     pd.DataFrame(rows, columns=COLS).to_csv(paths.qa / "bordercheck_provinces.csv", index=False)
     bad = [r for r in rows if r["verdict"] == "ARTEFACT"]
     if bad:
