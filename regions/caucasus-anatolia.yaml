@@ -230,7 +230,9 @@ provinces:
       name: Azerbaijan Plateau (incl. Sabalan, Sahand & Arasbaran)
       region: Northwestern Highlands
       family: plateaus
-      seeds: [[47.8, 38.25], [46.45, 37.75], [46.9, 38.8], [48.3, 38.25], [45.4, 38.45], [45.15, 37.6], [48.4, 36.75]]
+      # + the dry inner Talysh (Zuvand, Yardymli) west of the crest, in Azerbaijan (province gate)
+      seeds: [[47.8, 38.25], [46.45, 37.75], [46.9, 38.8], [48.3, 38.25], [45.4, 38.45], [45.15, 37.6], [48.4, 36.75],
+              [48.3, 38.68], [48.2, 38.92]]
     - code: "30"
       name: Northern Zagros (Kurdistan & Kermanshah, incl. Alvand)
       region: Zagros
@@ -320,15 +322,19 @@ provinces:
       family: plateaus
       seeds: [[35.8, 40.6], [36.6, 40.3], [37.0, 39.7], [34.9, 40.6], [38.3, 39.9]]
     - code: "68"
-      name: Eastern Anatolian Highlands (incl. Erzurum, Kars, Agri & Van)
+      name: Eastern Anatolian Highlands (incl. Erzurum, Agri & Van)
       region: Armenian Highland
       family: high_mountains
-      seeds: [[41.3, 39.9], [43.1, 40.6], [43.0, 39.7], [43.4, 38.5], [40.5, 39.2], [42.1, 38.9], [39.2, 39.0]]
+      # Kars and Ardahan moved to 72 (2026-11-14): one volcanic plateau with Shirak and Javakheti; the edge stood on
+      # the Turkish-Armenian and Turkish-Georgian borders (province gate); it now falls on the Allahuekber and Soganli
+      seeds: [[41.3, 39.9], [43.0, 39.7], [43.4, 38.5], [40.5, 39.2], [42.1, 38.9], [39.2, 39.0]]
     - code: "69"
       name: Southeastern Anatolian Plateau (incl. Sanliurfa, Mardin & Diyarbakir)
       region: Upper Mesopotamia
       family: plateaus
-      seeds: [[38.8, 37.2], [40.2, 37.9], [40.7, 37.3], [37.6, 37.1], [39.5, 37.5]]
+      # + the Cizre-Silopi plain: the edge with the Northern Zagros stood on the Tigris, which is the border there;
+      # the plain continues on both banks up to the Cudi front (province gate)
+      seeds: [[38.8, 37.2], [40.2, 37.9], [40.7, 37.3], [37.6, 37.1], [39.5, 37.5], [42.2, 37.3], [42.47, 37.24]]
     - code: "70"
       name: Colchis Lowland (incl. Adjara)
       region: Caucasus
@@ -340,10 +346,12 @@ provinces:
       family: high_mountains
       seeds: [[42.8, 43.0], [44.5, 42.6], [45.6, 42.2], [46.8, 41.6], [47.9, 41.0], [41.5, 43.2], [43.9, 42.55]]
     - code: "72"
-      name: Lesser Caucasus (incl. Javakheti & Karabakh)
+      name: Lesser Caucasus (incl. the Javakheti, Shirak & Kars Plateaus and Karabakh)
       region: Caucasus
       family: high_mountains
-      seeds: [[43.6, 41.4], [44.8, 40.8], [45.3, 40.2], [46.4, 39.8], [44.2, 41.0], [45.6, 39.5], [43.1, 41.6]]
+      # + Kars, Ardahan, and the Dmanisi and Tsalka plateaus, which continue Armenia's Lori plateau (province gate)
+      seeds: [[43.6, 41.4], [44.8, 40.8], [45.3, 40.2], [46.4, 39.8], [44.2, 41.0], [45.6, 39.5], [43.1, 41.6],
+              [43.1, 40.6], [42.75, 41.1], [44.2, 41.35], [44.1, 41.6]]
     - code: "73"
       name: Kura Lowland (incl. Mugan, Mil & Shirvan)
       region: Caucasus
@@ -353,7 +361,8 @@ provinces:
       name: Eastern Georgian Basins (incl. Kartli, Kakheti & Iori)
       region: Caucasus
       family: foothills
-      seeds: [[44.0, 42.0], [45.6, 41.8], [45.3, 41.4], [46.2, 41.4], [43.5, 42.1]]
+      # + the Gazakh lowland, which continues the Marneuli plain across the border (province gate)
+      seeds: [[44.0, 42.0], [45.6, 41.8], [45.3, 41.4], [46.2, 41.4], [43.5, 42.1], [45.37, 41.09]]
     - code: "75"
       name: Ararat Plain (incl. Nakhchivan & Igdir)
       region: Armenian Highland

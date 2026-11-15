@@ -285,16 +285,19 @@ def geology(cfg, paths: Paths, grid: Grid) -> None:
     unit_id = {c: i + 1 for i, c in enumerate(codes)}
     lab = rasterize_geoms(((geom, unit_id[c]) for geom, c in zip(g.geometry, g.GLG)), grid, dtype="uint16")
     write(paths.raster("geo_unit"), lab, grid, nodata=0, tags={str(v): k for k, v in unit_id.items()})
+    # source sheet of every cell (1 = first): the features stage blends geology layers across sheet edges
+    sheet = rasterize_geoms(((geom, int(s) + 1) for geom, s in zip(g.geometry, g.get("sheet", 0 * g.index))), grid)
+    write(paths.raster("geo_sheet"), sheet, grid, nodata=0)
     lut_l = np.zeros(max(unit_id.values()) + 1, "uint8")
     lut_a = np.full(max(unit_id.values()) + 1, np.nan, "float32")
     for c, i in unit_id.items():
         lut_l[i], lut_a[i] = units[c]
     write(paths.raster("geo_litho"), lut_l[lab], grid, nodata=0, tags={str(k): v for k, v in litho_groups(cfg).items()})
     write(paths.raster("geo_age"), lut_a[lab], grid, nodata=np.nan, tags=dict(units="age rank 0 Quaternary .. 8 Precambrian"))
-    # contacts = boundaries between different units
+    # contacts = boundaries between different units of one sheet (where two sheets meet is an edge of the maps)
     e = np.zeros(grid.shape, bool)
-    e[:, 1:] |= (lab[:, 1:] != lab[:, :-1]) & (lab[:, 1:] > 0) & (lab[:, :-1] > 0)
-    e[1:, :] |= (lab[1:, :] != lab[:-1, :]) & (lab[1:, :] > 0) & (lab[:-1, :] > 0)
+    e[:, 1:] |= (lab[:, 1:] != lab[:, :-1]) & (lab[:, 1:] > 0) & (lab[:, :-1] > 0) & (sheet[:, 1:] == sheet[:, :-1])
+    e[1:, :] |= (lab[1:, :] != lab[:-1, :]) & (lab[1:, :] > 0) & (lab[:-1, :] > 0) & (sheet[1:, :] == sheet[:-1, :])
     write(paths.raster("geo_contact"), e.astype("uint8"), grid)
     quicklook(lut_l[lab], paths.qa / "05_geology_litho.png", f"lithology group ({cfg['sources']['geology'].get('label', 'geo8ag')})", cmap="tab20", categorical=True)
 

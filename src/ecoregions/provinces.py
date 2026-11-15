@@ -212,6 +212,13 @@ def run(cfg) -> None:
     for i, u in enumerate(units):
         log.info("L2 %s %-70s %8.0f km²", u["code"], u["name"], (lab == i + 1).sum() * (pg.res / 1000) ** 2)
     _plot(lab, seeds, units, paths)
+    from . import bordercheck  # no border may come through the inputs or the hand-placed seeds
+
+    seg = {k for w in cfg["segmentation"]["weights"].values() for k, v in w.items() if v}
+    names = [n for n in {*pc["features"], *seg} if n != "litho"]
+    names += [f"litho_{k}" for k in litho_groups(cfg)] if "litho" in {*pc["features"], *seg} else []
+    bordercheck.inputs(cfg, names)
+    bordercheck.provinces(cfg, lab, pg, units)
 
 
 def _plot(lab, seeds, units, paths):

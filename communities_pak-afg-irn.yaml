@@ -394,6 +394,7 @@ communities:
   where:
     province:
     - 09
+    - '10'      # Brahui foothills below 1,200 m (2026-11-14): elevation, not the province edge, ends the belt
     elev:
     - 100
     - 1200
@@ -414,6 +415,10 @@ communities:
   where:
     province:
     - 09
+    - '10'      # Brahui valleys below 1,200 m (2026-11-14)
+    elev:
+    - null
+    - 1200
     slope:
     - null
     - 3
@@ -633,6 +638,7 @@ communities:
   - Prunus eburnea
   where:
     province:
+    - 09        # with the Kirthar crests (2026-11-14)
     - 08
     - '10'
     - '11'
@@ -656,6 +662,7 @@ communities:
   - Caragana ambigua
   where:
     province:
+    - 09        # with the Kirthar crests (2026-11-14): elevation, not the province edge, ends the belt
     - 08
     - '10'
     - '11'

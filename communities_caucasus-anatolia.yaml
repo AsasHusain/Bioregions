@@ -304,7 +304,7 @@ communities:
   group: Semi-desert
   indicators: [Artemisia fragrans, Salsola ericoides, Calligonum polygonoides, Kalidium caspicum]
   where:
-    province: ['75']
+    province: ['68', '72', '75']   # the dry Akhurian and Aras gorges on the Turkish side too (2026-11-14): rainfall and elevation, not the province edge, end it
     elev: [null, 1400]
     bio12: [null, 350]
   priority: 36

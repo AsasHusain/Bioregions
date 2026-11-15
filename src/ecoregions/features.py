@@ -38,7 +38,7 @@ import numpy as np
 
 from .config import Paths
 from .covariates import litho_groups
-from .grid import Grid, block_reduce, centre_sample, read, write
+from .grid import Grid, block_reduce, centre_sample, rasterize_geoms, read, write
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +130,8 @@ def build(cfg, only: list[str] | None = None) -> None:
         names.append("basin")
     gc.collect()
 
+    blend_seams(cfg, paths, grid, cg, out, names)
+
     # province grid (another integer aggregation)
     pf = cfg["grid"]["province_factor"]
     pg = cg.coarsen(pf)
@@ -144,6 +146,66 @@ def build(cfg, only: list[str] | None = None) -> None:
     if only is None:
         (paths.interim / "features.json").write_text(json.dumps(dict(features=names, coarse_res=cg.res,
                                                                      province_res=pg.res), indent=1))
+
+
+def blend(a: np.ndarray, seam: np.ndarray, res: float, band_m: float) -> np.ndarray:
+    """``a`` passing smoothly across the cells in ``seam``: weight of the sharp layer rising from 0 at the seam to 1 at
+    ``band_m``, the rest from a Gaussian-smoothed copy (sigma band/2, NaN-aware) that is continuous across it."""
+    from scipy import ndimage as ndi
+
+    w = np.clip(ndi.distance_transform_edt(~seam) * res / band_m, 0, 1).astype("float32")
+    ok = np.isfinite(a)
+    sig = band_m / 2 / res
+    num = ndi.gaussian_filter(np.where(ok, a, 0).astype("float32"), sig)
+    den = ndi.gaussian_filter(ok.astype("float32"), sig)
+    smooth = np.where(den > 1e-3, num / np.maximum(den, 1e-3), a)
+    return np.where(ok, w * a + (1 - w) * smooth, np.nan).astype("float32")
+
+
+def blend_seams(cfg, paths: Paths, grid: Grid, cg: Grid, out, names: list[str]) -> None:
+    """Seams between national source maps (``seams`` in config.yaml): geology layers across geology sheet edges,
+    listed layers across listed international borders. Every input is kept; only the step at the seam goes."""
+    sc = cfg.get("seams")
+    if not sc:
+        return
+    band = sc["band_km"] * 1000
+    f = cfg["grid"]["coarse_factor"]
+    todo = []
+    if paths.raster("geo_sheet").exists():
+        sh = centre_sample(read(paths.raster("geo_sheet")), f, cg.shape)
+        seam = np.zeros(cg.shape, bool)
+        dx = (sh[:, 1:] != sh[:, :-1]) & (sh[:, 1:] > 0) & (sh[:, :-1] > 0)
+        dy = (sh[1:, :] != sh[:-1, :]) & (sh[1:, :] > 0) & (sh[:-1, :] > 0)
+        seam[:, 1:] |= dx
+        seam[:, :-1] |= dx
+        seam[1:, :] |= dy
+        seam[:-1, :] |= dy
+        if seam.any():
+            todo.append(("geology sheet edges", seam, [n for n in names if n.startswith("litho_") or n in sc.get("geology", [])]))
+    for what, seam, layers in todo:
+        for n in layers:
+            write(out / f"{n}.tif", blend(read(out / f"{n}.tif"), seam, cg.res, band), cg, nodata=np.nan)
+        log.info("seams: %s blended over %.0f km across %s", ", ".join(layers), sc["band_km"], what)
+
+    # national seams inside one sheet, and in other compiled layers (soils): found by ``bordercheck.input_seams``
+    # (a layer changing at a border more than terrain and climate do), blended along that border, tested again with
+    # a wider band if still found; geology layers go together, as one map
+    from .bordercheck import input_seams
+
+    geo = lambda n: n.startswith("litho_") or n in sc.get("geology", [])  # noqa: E731
+    for wide in sc.get("border_bands_km", [30, 50, 80]):
+        rows, lines = input_seams(cfg, names)
+        found: dict[str, set] = {}
+        for r in rows:
+            if r["seam"]:
+                found.setdefault(r["border"], set()).update([n for n in names if geo(n)] if geo(r["layer"]) else [r["layer"]])
+        if not found:
+            break
+        for b, layers in found.items():
+            seam = rasterize_geoms([(lines[b], 1)], cg, all_touched=True).astype(bool)
+            for n in sorted(layers):
+                write(out / f"{n}.tif", blend(read(out / f"{n}.tif"), seam, cg.res, wide * 1000), cg, nodata=np.nan)
+            log.info("seams: %s blended over %.0f km across the %s border", ", ".join(sorted(layers)), wide, b)
 
 
 def load_stack(paths: Paths, names: list[str], level: str = "coarse", window=None) -> dict[str, np.ndarray]:

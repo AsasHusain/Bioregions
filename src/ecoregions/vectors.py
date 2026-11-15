@@ -64,7 +64,11 @@ def geology(cfg, kind: str = "polygons") -> gpd.GeoDataFrame:
         finally:
             pyogrio.set_gdal_config_options({"OGR_ORGANIZE_POLYGONS": None})
     srcs = [f"/vsizip/{d / x['file']}/{x[kind]}" for x in [src, *src.get("also", [])] if x.get(kind)]
-    return _read_clip(cfg, srcs, f"geology_{kind}")
+    if len(srcs) == 1:
+        return _read_clip(cfg, srcs[0], f"geology_{kind}").assign(sheet=0)
+    # one layer per sheet, numbered in drawing order (later sheets overwrite earlier ones), so sheet edges are known
+    return pd.concat([_read_clip(cfg, f, f"geology_{kind}_sheet{i}").assign(sheet=i) for i, f in enumerate(srcs)],
+                     ignore_index=True)
 
 
 def resolve(cfg) -> gpd.GeoDataFrame:

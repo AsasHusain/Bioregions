@@ -35,6 +35,14 @@ def run(cfg) -> None:
         return
     paths = Paths(cfg)
     area = mapped_area(cfg, paths, *load_boundaries(paths)).to_crs(cfg["crs"]["proj4"]).union_all()
+    # the strip, kept aside before it is clipped away: the world merge compares it with the neighbour's own map there
+    strip = paths.outputs / "strip.gpkg"
+    for n, col in (("ecoregions", "type"), ("faunal_regions", "faunal_region")):
+        g = gpd.read_file(paths.outputs / "ecoregions.gpkg", layer=n)[[col, "geometry"]]
+        g = g.assign(geometry=g.geometry.difference(area))
+        g = g[~g.is_empty]
+        if len(g):  # a second join finds no strip left and keeps the first one's
+            g.to_file(strip, layer=n)
     for f in (paths.outputs / "ecoregions.gpkg", paths.outputs / "physiographic.gpkg"):
         layers = [(n, gpd.read_file(f, layer=n)) for n, _ in pyogrio.list_layers(f)]
         f.unlink()

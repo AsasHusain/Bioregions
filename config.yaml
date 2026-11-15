@@ -142,6 +142,20 @@ provinces:
   features: {elev: 1.0, relief5k: 1.2, relief1k: 0.8, slope: 0.8, rem: 0.6, dune_frac: 1.0, sand: 0.6,
              bio12: 0.6, bio1: 0.4, ai: 0.5, litho: 1.0}
 
+# Seams between national source maps (2026-11-14). Geology is compiled sheet by sheet (USGS geo8ag, geo2cg, geo1ec,
+# geo4_2l), each with its own legend and detail, and the sheets meet near international borders: rock type changed at
+# the Iran, Turkiye-Armenia and Turkiye-Georgia borders far more than at the same borders shifted (72-96 % of point
+# pairs against 39-61 %), and province and unit edges followed. Every input is kept; within `band_km` of a seam each
+# affected layer passes smoothly from one source's values to the other's (the sharp layer weighted by distance to the
+# seam, a Gaussian-smoothed one at the seam), and a contact between two sheets is no contact. Seams inside one sheet
+# (the former Soviet sheet was compiled republic by republic) and in other compiled layers (SoilGrids is one global
+# product, but its training profiles are national) are found at each border by `bordercheck.input_seams` (a layer
+# changing there more than terrain and climate do) and blended along it, with the next band until none is found.
+seams:
+  band_km: 20                        # along geology sheet edges
+  border_bands_km: [30, 50, 80]      # along borders where a seam is found, widening while one remains
+  geology: [age, dune_frac]          # + every litho_* group: blended as one map
+
 # ---------------------------------------------------------------------------
 # L3 delineation
 # ---------------------------------------------------------------------------
@@ -351,3 +365,9 @@ plots:                          # confirmatory vegetation-plot tests (plots stag
   seed: 20261112
   map_sha256: null              # the frozen map's hash, set in the region file before the plots are opened
 
+# ---------------------------------------------------------------------------
+# World merge (`python -m ecoregions.world`): the published areas as one map; units of one type that meet across a
+# seam become one unit. An area joins the list when it is published.
+# ---------------------------------------------------------------------------
+world:
+  areas: [texas, pak-afg-irn, central-asia]
