@@ -270,7 +270,7 @@ communities:
   indicators: [Festuca valesiaca, Koeleria macrantha, Stipa tirsa, Thymus kotschyanus]
   where:
     province: ['68', '72', '73', '75']   # 73: the Shamakhi and Ismayilli mountains (Kura semi-desert fallback reached 1,480 m)
-    elev: [1400, 2500]
+    elev: [1300, 2500]   # meets the Ararat semi-desert at 1,300 m (Akhurian, 2026-11-16)
     bio12: [250, 700]   # 250 (was 300): Nakhchivan's mountain steppes, which fell back to semi-desert up to 2,580 m
   priority: 40
 - id: cau_arid_open_woodland
@@ -305,8 +305,8 @@ communities:
   indicators: [Artemisia fragrans, Salsola ericoides, Calligonum polygonoides, Kalidium caspicum]
   where:
     province: ['68', '72', '75']   # the dry Akhurian and Aras gorges on the Turkish side too (2026-11-14): rainfall and elevation, not the province edge, end it
-    elev: [null, 1400]
-    bio12: [null, 350]
+    elev: [null, 1300]   # 1,300 m on both banks; the gap under the steppe left 1,150-1,400 m to the provinces (Akhurian, 2026-11-16)
+    bio12: [null, 450]
   priority: 36
 - id: cau_kura_halophyte
   structure: sparse
