@@ -40,14 +40,43 @@ log = logging.getLogger(__name__)
 CRS = "EPSG:6933"
 
 
-def choose_k(scan: pd.DataFrame, step=0.01, flat=5, k_min=8) -> tuple[int, int]:
-    """Start of the first plateau after ``k_min``, and the key's groups (largest step above 5 regions, below k)."""
+def plateau(scan: pd.DataFrame, step=0.01, flat=5, k_min=8) -> int:
+    """Start of the first plateau from ``k_min``: a step of at least ``step`` into k, then less per region for ``flat``."""
     e = scan.set_index("k").explained
     d = e.diff()
-    k = next((k for k in e.index if k >= k_min and d.get(k, 0) >= step
-              and all(d.get(j, 0) < step for j in range(k + 1, k + 1 + flat) if j in d)), int(e.index.max()))
+    return int(next((k for k in e.index if k >= k_min and d.get(k, 0) >= step
+                     and all(d.get(j, 0) < step for j in range(k + 1, k + 1 + flat) if j in d)), int(e.index.max())))
+
+
+def choose_k(scan: pd.DataFrame, step=0.01, flat=5, k_min=8) -> tuple[int, int]:
+    """Start of the first plateau after ``k_min``, and the key's groups (largest step above 5 regions, below k)."""
+    k = plateau(scan, step, flat, k_min)
+    d = scan.set_index("k").explained.diff()
     g = int(d[(d.index > 5) & (d.index < k)].idxmax())
-    return int(k), g
+    return k, g
+
+
+def nested(D: np.ndarray, grp: np.ndarray, step=0.01, flat=5, k_max=30) -> tuple[np.ndarray, dict]:
+    """Regions within each group: the group's own UPGMA tree (the global tree's subtree) cut where its own turnover
+    curve first levels off (``plateau`` from 2 regions), so each part of a large joint area gets the detail its own
+    turnover supports instead of one cut for all (which left Caucasus & Anatolia one region). Region labels 1..K,
+    numbered group by group, and each group's number of regions."""
+    lab = np.zeros(len(grp), int)
+    ks, nxt = {}, 0
+    for g in np.unique(grp):
+        idx = np.flatnonzero(grp == g)
+        sub = np.ones(len(idx), int)
+        if len(idx) > 2:
+            dv = squareform(D[np.ix_(idx, idx)], checks=False)
+            Z = linkage(dv, method="average")
+            i, j = np.triu_indices(len(idx), 1)
+            sc = pd.DataFrame([dict(k=k, explained=explained_turnover(dv, i, j, fcluster(Z, k, criterion="maxclust")))
+                               for k in range(1, min(k_max, len(idx)) + 1)])
+            sub = fcluster(Z, plateau(sc, step, flat, k_min=2), criterion="maxclust")
+        lab[idx] = nxt + sub
+        ks[int(g)] = int(sub.max())
+        nxt += int(sub.max())
+    return lab, ks
 
 
 def assign(cells_sp: sp.csr_matrix, cand: np.ndarray, freq: np.ndarray) -> np.ndarray:
@@ -164,17 +193,19 @@ def run(areas: list[str], bin_km=25.0) -> dict:
 
     d = beta_sim(B)
     dv = squareform(d, checks=False)
-    del d
     i, j = np.triu_indices(B.shape[0], 1)
     Z = linkage(dv, method="average")
     scan = pd.DataFrame([dict(k=k, explained=round(explained_turnover(dv, i, j, fcluster(Z, k, criterion="maxclust")), 4))
                          for k in range(fc["k_range"][0], max(fc["k_range"][1], 40) + 1)])
     del dv, i, j
-    K, G = choose_k(scan)
-    log.info("joint faunal: turnover explained\n%s\n-> %d regions in %d groups", scan.to_string(index=False), K, G)
-    lab_b = fcluster(Z, K, criterion="maxclust")
+    _, G = choose_k(scan)
     grp_b = fcluster(Z, G, criterion="maxclust")
-    parent = pd.crosstab(lab_b, grp_b).idxmax(axis=1)  # UPGMA nests them exactly
+    lab_b, per = nested(d, grp_b)
+    del d
+    K = int(lab_b.max())
+    log.info("joint faunal: turnover explained\n%s\n-> %d groups; regions within each group (own plateau): %s -> %d regions",
+             scan.to_string(index=False), G, per, K)
+    parent = pd.crosstab(lab_b, grp_b).idxmax(axis=1)  # nested by construction
     freq = np.vstack([np.asarray(B[lab_b == k].mean(axis=0)).ravel() for k in range(1, K + 1)])
     binlab = dict(zip(ub, lab_b))
 
@@ -237,4 +268,9 @@ if __name__ == "__main__":
         assert list(assign(X, np.array([[2, 1], [1, 2]]), freq)) == [1, 2]
         d = np.array([[1, -1, 0], [1, -1, 1], [0, -1, -1], [1, -1, 1], [1, 0, 1], [1, 0, 1]])
         assert list(longest_runs(d)) == [3, 4, 3], longest_runs(d)
+        # two groups; the first holds two tight clusters, which become its two regions, numbered before the second's
+        pts = np.r_[np.zeros(6), np.full(6, 1.0), np.full(6, 10.0)] + np.tile([0, .01, .02], 6)
+        D = np.abs(pts[:, None] - pts[None, :])
+        lab, ks = nested(D, np.r_[np.ones(12, int), np.full(6, 2)])
+        assert ks[1] == 2 and len(set(lab[:6])) == 1 and lab[0] != lab[6] and lab[12:].min() == 3, (ks, lab)
         print("ok")
