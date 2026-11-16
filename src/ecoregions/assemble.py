@@ -298,6 +298,16 @@ def run(cfg) -> None:
     for j, c in enumerate(comms):
         lut[j + 1] = tidx[c["ecoregion"]]
 
+    # the map stores communities by their place in the rules; a rule added since (also in an included file) shifts them
+    import rasterio
+
+    with rasterio.open(paths.raster("communities")) as src:
+        tags = src.tags()
+    stale = [k for k, c in enumerate(comms, 1) if tags.get(str(k)) not in (None, c["name"])]
+    if stale or len(comms) < max((int(k) for k in tags if k.isdigit()), default=0):
+        raise SystemExit(f"communities map was built with other rules (community {stale[:1] or 'count'} differs); "
+                         "rerun the communities stage")
+
     # 1-2. ecoregion types, smoothed on the coarse grid
     cls90 = lut[read(paths.raster("communities"))]
     apply_zones(cls90, ac.get("zones", []), tidx, paths)
