@@ -179,7 +179,7 @@ communities:
   group: Montane pine forest
   indicators: [Pinus sylvestris, Pinus nigra, Quercus petraea, Juniperus oxycedrus]
   where:
-    province: ['65', '66', '67', '72']
+    province: ['65', '66', '67', '72', '74']   # 74: the same pine-oak slopes continue across the province edge (Gadabay, Tavush; border check)
     elev: [800, 2200]
     bio12: [450, 900]
     slope: [5, null]
@@ -215,7 +215,7 @@ communities:
   group: Beech forest
   indicators: [Fagus orientalis, Acer velutinum, Carpinus betulus, Ilex colchica]
   where:
-    province: ['71', '72', '73']
+    province: ['71', '72', '73', '74']   # 74: beech of the Shamkir and Gadabay slopes, as on the Lesser Caucasus side
     elev: [900, 1900]
     bio12: [700, null]
     slope: [5, null]

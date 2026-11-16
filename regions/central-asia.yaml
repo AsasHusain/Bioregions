@@ -406,8 +406,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_central-asia.yaml
 assemble:
-  faunal_k: 20                 # faunal regions: turnover explained 0.578, a step from 0.568 then flat to 23 (as Texas: start of a plateau)
-  faunal_group_k: 8            # the key groups them (nests exactly; the largest step in turnover explained above 5 regions, 0.40 -> 0.46)
+  faunal_k: 15                 # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins): turnover explained 0.574, a step of 0.010 into 15 then under 0.01 per region to 21 (start of a plateau)
+  faunal_group_k: 6            # the key groups them (nests exactly; the largest step above 5 regions, 0.377 -> 0.425)
 confirmation:   # docs/preregistration.md, section 8: sealed squares of the world mask inside Central Asia (rank cut-off from
   # scripts/sealed_counts.py, record counts only); their records and buffer are not read until the map is frozen
   world_mask: docs/confirmation/world_mask.json
@@ -417,4 +417,4 @@ confirmation:   # docs/preregistration.md, section 8: sealed squares of the worl
   open: true                   # opened once on the frozen v0.6.0 (2026-11-14)
   map_sha256: b1851f842df76626257fb01aea52a5fdcf6a13c74cfc505e4962c933ffe9eec8   # v0.6.0, frozen 2026-11-14
 faunal:
-  k_maps: [8, 15, 20]          # 20 regions grouped into 8 (assemble.faunal_k / faunal_group_k)
+  k_maps: [6, 15]             # 15 regions grouped into 6, shared by the three areas (assemble.faunal_k / faunal_group_k)
