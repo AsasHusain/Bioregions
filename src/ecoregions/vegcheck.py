@@ -99,9 +99,18 @@ def pnv_legend(paths: Paths) -> dict[int, str]:
 # agreement
 # ---------------------------------------------------------------------------
 def crosstab_km2(a: np.ndarray, b: np.ndarray, valid: np.ndarray, km2: float) -> pd.DataFrame:
-    """Area (km²) of every (a, b) pair among valid cells."""
-    s = pd.Series(1, index=pd.MultiIndex.from_arrays([a[valid], b[valid]]))
-    return (s.groupby(level=[0, 1]).size() * km2).unstack(fill_value=0)
+    """Area (km²) of every (a, b) pair among valid cells (non-negative integer codes), counted in chunks: a large
+    area's cells as one pandas index need several GB."""
+    A, B, V = a.ravel(), b.ravel(), valid.ravel()
+    nb = int(B[V].max()) + 1 if V.any() else 1
+    tot = np.zeros((int(A[V].max()) + 1 if V.any() else 1) * nb, np.int64)
+    for i in range(0, A.size, 20_000_000):
+        m = V[i:i + 20_000_000]
+        tot += np.bincount(A[i:i + 20_000_000][m].astype(np.int64) * nb + B[i:i + 20_000_000][m].astype(np.int64),
+                           minlength=tot.size)
+    t = tot.reshape(-1, nb)
+    r, c = np.flatnonzero(t.sum(1)), np.flatnonzero(t.sum(0))
+    return pd.DataFrame(t[np.ix_(r, c)] * km2, index=r, columns=c)
 
 
 def precision_recall(pred: np.ndarray, truth: np.ndarray, tol_cells: int = 0) -> tuple[float, float]:
