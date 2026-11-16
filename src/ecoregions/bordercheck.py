@@ -87,30 +87,37 @@ def pixels(a, b, transform, shape):
     return r1[ok], c1[ok], r2[ok], c2[ok]
 
 
-def contrast(lines, rasters: list, transform, step_m=2000.0, off_m=3000.0) -> float:
+def contrast(lines, rasters: list, transform, step_m=2000.0, off_m=(3000.0, 10000.0)) -> float:
     """Median over points every ``step_m`` along ``lines`` of the summed relative difference of ``rasters`` (each
-    scaled by its own spread) between the points ``off_m`` either side of the line."""
-    a, b = side_points(lines, off_m, step_m, min_len=2 * step_m)
-    if not len(a):
-        return np.nan
-    r1, c1, r2, c2 = pixels(a, b, transform, rasters[0][0].shape)
-    if not len(r1):
-        return np.nan
-    v = sum(np.abs(arr[r1, c1].astype("float64") - arr[r2, c2]) / spread for arr, spread in rasters)
-    return float(np.nanmedian(v)) if np.isfinite(v).any() else np.nan
+    scaled by its own spread) between the points ``off_m`` either side of the line; the larger of the medians at
+    each offset, so a gradual change (a piedmont rising 1,150 -> 2,000 m over 20 km at Chaman) counts as well as a
+    sharp one."""
+    out = []
+    for off in np.atleast_1d(off_m):
+        a, b = side_points(lines, off, step_m, min_len=2 * step_m)
+        if not len(a):
+            continue
+        r1, c1, r2, c2 = pixels(a, b, transform, rasters[0][0].shape)
+        if not len(r1):
+            continue
+        v = sum(np.abs(arr[r1, c1].astype("float64") - arr[r2, c2]) / spread for arr, spread in rasters)
+        if np.isfinite(v).any():
+            out.append(float(np.nanmedian(v)))
+    return max(out) if out else np.nan
 
 
 def _rasters(paths, grid):
     """What makes a natural break, on the 270 m feature grid (ample for a 3 km offset),
     each with its p90-p10 spread: elevation, annual rainfall, soil sand, height above the nearest channel (a
-    floodplain's edge) and dune texture (a sand sea's edge). Elevation and rainfall alone took the edges of the Thar,
-    the Indus floodplain and the Karakum for arbitrary lines. The compiled layers are those of the features stage,
-    already blended across source-map seams."""
+    floodplain's edge), dune texture (a sand sea's edge) and slope (a mountain front's foot). Elevation and rainfall
+    alone took the edges of the Thar, the Indus floodplain and the Karakum for arbitrary lines; without slope, range
+    fronts whose height changes little within 3 km (the Khwaja Amran front at Chaman). The compiled layers are those
+    of the features stage, already blended across source-map seams."""
     from .grid import read
 
     cg = grid.coarsen(paths.cfg["grid"]["coarse_factor"])
     out = []
-    for name in ("elev", "bio12", "sand", "hand", "dune_frac"):
+    for name in ("elev", "bio12", "sand", "hand", "dune_frac", "slope"):
         if paths.coarse(name).exists():
             a = read(paths.coarse(name)).astype("float32")
             out.append((a, float(np.nanpercentile(a, 90) - np.nanpercentile(a, 10)) or 1.0))

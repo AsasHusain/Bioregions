@@ -346,7 +346,7 @@ def run(cfg) -> None:
     hole = study & (snapped == 0)
     snapped[hole] = lab[hole]
     log.info("snapping moved %.2f%% of study cells", 100 * ((snapped != lab) & study).sum() / study.sum())
-    del lab
+    del lab, hole, study  # ~1.5 GB freed before the contiguity pass on a large area
     mmu_px = int(ac["mmu_km2"] / grid.cell_km2)
     snapped, _ = make_contiguous(snapped, mmu_px)
     snapped = merge_small_units(snapped, {int(u): mmu_px for u in np.unique(snapped[snapped > 0])})

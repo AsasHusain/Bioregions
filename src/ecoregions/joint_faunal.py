@@ -2,7 +2,9 @@
 
 Each area's ``fauna`` stage gives species presence on its own 10 km cells. Here the cells whose centres lie inside
 each area's mapped countries (no overlap strip, so no cell is counted twice) are pooled into ``bin_km`` equal-area
-bins (EPSG:6933; presence = any cell of the bin), and the bins of all areas are clustered once, as in ``faunal``:
+bins (EPSG:6933; presence = any cell of the bin), and the bins of all areas are clustered once, as in ``faunal``.
+Species whose range map stops at a border on level ground for 100 km or more are left out (``clipped_species``):
+such maps were drawn country by country and would draw the border into the regions. The rest are clustered with
 Simpson's beta diversity and average linkage (UPGMA). Bins keep the matrix within memory (a 10 km clustering of
 three areas would need some 12 GB per matrix). The number of regions is read from the turnover curve as before
 (the start of a plateau: a step of at least ``step`` into k, then at most ``step`` per region for ``flat`` more),
@@ -63,13 +65,62 @@ def assign(cells_sp: sp.csr_matrix, cand: np.ndarray, freq: np.ndarray) -> np.nd
     return np.where(best > 0, best, cand[:, 0])
 
 
+def longest_runs(d: np.ndarray) -> np.ndarray:
+    """Per column, the longest run of consecutive rows equal to +1 or to -1 (one-sided presence along a border)."""
+    best = np.zeros(d.shape[1], int)
+    for sgn in (1, -1):
+        run = np.zeros(d.shape[1], int)
+        for row in d == sgn:
+            run = np.where(row, run + 1, 0)
+            best = np.maximum(best, run)
+    return best
+
+
+def clipped_species(grid, cells, X, names, countries, dem_path, off_m=12000.0, step_m=10000.0, min_km=100.0,
+                    max_dz=300.0) -> set:
+    """Species whose range map stops at an international border: present on one side and absent on the other at
+    pairs of cells ``off_m`` either side of the border, every ``step_m``, for at least ``min_km`` in a row, where
+    the two cells differ in height by less than ``max_dz`` (so neither height nor a crest explains it). IUCN and
+    BirdLife ranges drawn country by country end at borders (the Cape and woolly hares at the Iran-Pakistan line),
+    and such a map cannot say where the species really stops."""
+    import rasterio
+    from .bordercheck import international_borders, side_points
+
+    idx = np.full(grid.shape, -1)
+    idx[cells.row, cells.col] = np.arange(len(cells))
+    x0, x1, y0, y1 = grid.x0, grid.x0 + grid.width * grid.res, grid.y0 - grid.height * grid.res, grid.y0
+    cg = countries.to_crs(grid.crs).cx[x0:x1, y0:y1]
+    lines = shapely.line_merge(international_borders(cg).intersection(shapely.box(x0, y0, x1, y1)))
+    tl = Transformer.from_crs(grid.crs, 4326, always_xy=True)
+    out = set()
+    with rasterio.open(dem_path) as dem:
+        for ln in shapely.get_parts(lines):
+            if ln.length < min_km * 1000:
+                continue
+            a, b = side_points(ln, off_m, step_m)
+            cell, z = [], []
+            for p in (a, b):
+                r, c = ((grid.y0 - p[:, 1]) / grid.res).astype(int), ((p[:, 0] - grid.x0) / grid.res).astype(int)
+                ok = (r >= 0) & (r < grid.height) & (c >= 0) & (c < grid.width)
+                cell.append(np.where(ok, idx[np.clip(r, 0, grid.height - 1), np.clip(c, 0, grid.width - 1)], -1))
+                z.append(np.array([v[0] for v in dem.sample(list(zip(*tl.transform(p[:, 0], p[:, 1]))))], float))
+            good = (cell[0] >= 0) & (cell[1] >= 0) & (np.abs(z[0] - z[1]) < max_dz)
+            if good.sum() * step_m < min_km * 1000:
+                continue
+            d = (X[np.where(good, cell[0], 0)].toarray().astype(np.int8) - X[np.where(good, cell[1], 0)].toarray().astype(np.int8))
+            d[~good] = 0
+            out |= {names[j] for j in np.flatnonzero(longest_runs(d) * step_m >= min_km * 1000)}
+    return out
+
+
 def run(areas: list[str], bin_km=25.0) -> dict:
     from .boundaries import load_boundaries, mapped_area
 
     cfgs = {r: load_config(region=r) for r in areas}
     fc = cfgs[areas[0]]["faunal"]
     countries, disputed = load_boundaries(Paths(cfgs[areas[0]]))
-    data, names = {}, {}
+    data, names, clipped = {}, {}, {}
+    dem = f"/vsizip/{(Paths(cfgs[areas[0]]).raw / 'gmted2010' / 'mn30_grd.zip').as_posix()}/mn30_grd"
     for r, cfg in cfgs.items():
         src = Paths(cfg).interim / "fauna"
         grid = Grid.load(src / "grid.json")
@@ -77,6 +128,8 @@ def run(areas: list[str], bin_km=25.0) -> dict:
         spc = pd.read_csv(src / "species.csv")
         X = sp.load_npz(src / f"presence_{fc['presence']}.npz").tocsr()
         X.data[:] = 1
+        for n in clipped_species(grid, cells, X, spc.name.tolist(), countries, dem):
+            clipped.setdefault(n, []).append(r)
         for n in spc.name:
             names.setdefault(n, len(names))
         cols = spc.name.map(names).to_numpy()
@@ -87,10 +140,17 @@ def run(areas: list[str], bin_km=25.0) -> dict:
         data[r] = dict(cfg=cfg, grid=grid, cells=cells, X=Xg, inside=inside,
                        bx=np.floor(np.asarray(x) / (bin_km * 1000)).astype(int),
                        by=np.floor(np.asarray(y) / (bin_km * 1000)).astype(int))
-    S = len(names)
-    names_list = sorted(names, key=names.get)
+    keep = np.array([n not in clipped for n in sorted(names, key=names.get)])
+    names_list = [n for n, k in zip(sorted(names, key=names.get), keep) if k]
+    S = len(names_list)
     for d in data.values():
-        d["X"] = d["X"][:, :S].tocsr()
+        d["X"] = d["X"][:, :len(keep)][:, np.flatnonzero(keep)].tocsr()
+    log.info("joint faunal: %d of %d species left out, their range maps stopping at a border on level ground "
+             "(qa/clipped_species.csv in each area)", len(clipped), len(keep))
+    cl = pd.DataFrame(sorted((n, ", ".join(a)) for n, a in clipped.items()), columns=["species", "areas"])
+    for cfg in cfgs.values():
+        (Paths(cfg).qa).mkdir(parents=True, exist_ok=True)
+        cl.to_csv(Paths(cfg).qa / "clipped_species.csv", index=False)
 
     # bins from the cells inside the areas
     key = np.concatenate([d["bx"][d["inside"]] * 100000 + d["by"][d["inside"]] for d in data.values()])
@@ -175,4 +235,6 @@ if __name__ == "__main__":
         X = sp.csr_matrix(np.array([[1, 1, 0], [0, 0, 1]]))
         freq = np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
         assert list(assign(X, np.array([[2, 1], [1, 2]]), freq)) == [1, 2]
+        d = np.array([[1, -1, 0], [1, -1, 1], [0, -1, -1], [1, -1, 1], [1, 0, 1], [1, 0, 1]])
+        assert list(longest_runs(d)) == [3, 4, 3], longest_runs(d)
         print("ok")

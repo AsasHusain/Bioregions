@@ -37,12 +37,15 @@ log = logging.getLogger(__name__)
 
 
 def _norm(a: np.ndarray, scale: float) -> np.ndarray:
-    return np.clip(a / scale, 0, 1).astype("float32")
+    r = (a / scale).astype("float32", copy=False)
+    return np.clip(r, 0, 1, out=r)  # in place: each copy of a large area's grid is ~3 GB
 
 
 def _grad(a: np.ndarray) -> np.ndarray:
     gy, gx = np.gradient(a)
-    return np.hypot(gx, gy).astype("float32")
+    np.hypot(gx, gy, out=gx)
+    del gy
+    return gx.astype("float32", copy=False)
 
 
 def boundary_strength(cfg, paths: Paths, grid: Grid) -> np.ndarray:
@@ -58,7 +61,7 @@ def boundary_strength(cfg, paths: Paths, grid: Grid) -> np.ndarray:
 
     div = read(paths.raster("divides")).astype("float32") / 2.0
     B += w["divide"] * div * relief_f
-    del div
+    del div, relief_f
 
     plains = read(paths.raster("plains")).astype(bool)
     rem = np.nan_to_num(read(paths.raster("rem")))
@@ -136,7 +139,7 @@ def make_contiguous(lab: np.ndarray, min_new_px: int, rounds: int = 5) -> tuple[
 def _contiguous_pass(lab: np.ndarray, min_new_px: int) -> tuple[np.ndarray, int, int]:
     from skimage.measure import label as cc_label
 
-    comp = cc_label(lab, connectivity=2, background=0)
+    comp = cc_label(lab, connectivity=2, background=0).astype(np.int32)  # int64 is ~6 GB on a large area
     ncomp = comp.max()
     sizes = np.bincount(comp.ravel(), minlength=ncomp + 1)
     comp_unit = np.zeros(ncomp + 1, lab.dtype)

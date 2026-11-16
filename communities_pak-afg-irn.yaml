@@ -570,6 +570,33 @@ communities:
     3,008 m, sat in that gap). LOW CONFIDENCE: only about a dozen wild Juniperus records in Balochistan (GBIF download 2026),
     so the extent rests mainly on the literature.'
   priority: 70
+- id: toba_kakar_juniper_afghan
+  structure: woodland_conifer
+  ecoregion: juniper
+  name: Ziarat juniper woodland (Afghan slopes of the Toba Kakar)
+  group: Himalayan dry temperate forests (juniper)
+  indicators:
+  - Juniperus excelsa subsp. polycarpos
+  - Fraxinus xanthoxyloides
+  - Pistacia khinjuk
+  - Artemisia maritima
+  where:
+    province:
+    - '25'
+    - '26'
+    elev:
+    - 2000
+    - null
+    slope:
+    - 4
+    - null
+    bio12:
+    - 300
+    - null
+  note: 'The Toba Kakar is one range across the Durand Line: the same juniper slopes above 2,000 m continue onto its
+    Afghan side, which falls in the Helmand Basin and Ghazni Plateau provinces (border check, 2026-11-16; the juniper
+    had stopped at the line). The rainfall floor keeps it to the moister range rim, out of the dry Ghazni plateau.'
+  priority: 70
 - id: chilgoza_pine
   structure: forest_conifer
   ecoregion: sulaiman_temperate
