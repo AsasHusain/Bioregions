@@ -1,32 +1,34 @@
 # World Atlas of Biotic Regions
 
-A map of the world's regions of native life. A Biotic Region is a connected area whose native plants and animals
-together form a community distinct from those of its neighbours. Each region holds its own mix of habitats; a
-riparian forest or a juniper belt is a habitat inside a region, not a region of its own.
+The World Atlas of Biotic Regions is mapping the world's regions of native life, area by area. A Biotic Region is a
+connected area whose native plants and animals together form a community distinct from those of its neighbours.
+Each region holds its own mix of habitats; a riparian forest or a juniper belt is a habitat inside a region, not a
+region of its own.
 
-The atlas is built on its own definition and evidence, and tested against established maps such as RESOLVE
-*Ecoregions 2017*.
+The atlas uses its own definition and evidence. Each map is tested against established maps, such as RESOLVE
+*Ecoregions 2017*, and against maps built from climate or location alone.
 
 ## Status
 
-The first map covers Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and Anatolia as one continuous area of
-about 5.5 million km². It combines four kinds of evidence on a 10 km grid:
+The first map, now in development, covers Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and Anatolia as one
+continuous area of about 5.5 million km². It combines four kinds of evidence on a 10 km grid:
 
 - native plant composition, modelled from plant records and vegetation plots;
 - native mammals, birds, reptiles and amphibians, from range maps;
 - the mix of natural vegetation types, from the vegetation layer described below;
 - climate, terrain, soils and geology.
 
-Each kind of evidence stays in the model only where it improves predictions of species at places not used to build
-the map, and every cell reports the plant evidence behind it. The method is in [`docs/plan.md`](docs/plan.md).
+Each kind of evidence stays in the model only if it improves predictions of species at places not used to build the
+map, and every cell reports the plant evidence behind it. The method is in [`docs/plan.md`](docs/plan.md).
 
 ## Earlier maps
 
 The atlas grows out of Revised Ecoregions of the World ([AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions),
-frozen), which mapped 5.2 million km² in two layers. Both are kept here with their test results:
+frozen), which mapped 5.2 million km² in two layers. Both layers are kept here with their test results:
 
-- **Floral Ecoregions**: natural vegetation mapped at 90 m, now the atlas's vegetation layer.
-- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians, now its animal layer.
+- **Floral Ecoregions**: natural vegetation mapped at 90 m, the basis of the atlas's vegetation layer.
+- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians on 10 km cells, built from the
+  range maps the atlas's animal layer uses.
 
 | Area | Version | Land area | Floral Ecoregions | Types | Faunal Ecoregions | Maps |
 |---|---|---|---|---|---|---|
