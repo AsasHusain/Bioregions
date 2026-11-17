@@ -271,8 +271,8 @@ def run(areas: list[str]) -> None:
     rows = bordercheck.judge("ecoregions", sel(units), countries.to_crs(CRS), rs, tr, tol, min_km,
                              bordercheck.internal_boundaries(sel(prov)), accept=accept)
     rows += bordercheck.judge("faunal_regions", sel(faunal), countries.to_crs(CRS), rs, tr, tol, min_km, accept=accept)
-    # borders inside one area were judged by that area's gate (six layers at 270 m); this one judges the seams
-    at_seam = shapely.union_all(list(seam.values())).buffer(2 * tol * 1000)
+    # borders inside one area were judged by that area's gate (six layers at 270 m); this one judges the seams (a stretch lies within tol of its border)
+    at_seam = shapely.union_all(list(seam.values())).buffer(tol * 1000 + 1000)
     mid = gpd.GeoSeries(gpd.points_from_xy([r["lon"] for r in rows], [r["lat"] for r in rows]), crs=4326).to_crs(CRS)
     rows = [r for r, m in zip(rows, mid) if at_seam.contains(m)]
     pd.DataFrame(rows, columns=bordercheck.COLS).to_csv(out_dir / "bordercheck.csv", index=False)

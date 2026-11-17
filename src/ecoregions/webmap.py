@@ -72,6 +72,8 @@ def hillshade_png(paths: Paths, cfg, grid: Grid) -> tuple[str, list]:
 
 def _geojson(gdf: gpd.GeoDataFrame, tol: float, cols: list[str]) -> dict:
     g = gdf.copy()
+    bad = ~g.is_valid
+    g.loc[bad, "geometry"] = g.geometry[bad].buffer(0)  # rings a reprojection left crossing; simplification rejects them
     if tol:  # polygons as a coverage (shared edges stay shared); lines one by one
         lines = g.geom_type.str.contains("Line").all()
         g["geometry"] = (g.geometry.simplify(tol).values if lines
