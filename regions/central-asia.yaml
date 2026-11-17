@@ -89,6 +89,9 @@ bordercheck:
     - {lat: 37.53, lon: 65.67, layer: provinces, reason: "the Amu Darya in its floodplain; tugai covers both banks in both provinces, so no type changes at the river"}
     - {lat: 39.85, lon: 69.31, layer: faunal_regions, reason: "foot of the Turkestan Range, where the Fergana floor (Tajik cells, median 1,100 m) meets the foothills (Kyrgyz cells, 1,640 m); the border was drawn along the same foot, and at matched heights only 4 of 1,695 species differ"}
     - {lat: 40.22, lon: 69.81, layer: faunal_regions, reason: "edge of the Fergana valley floor (Tajik cells, median 530 m) against the Alai foothills (Kyrgyz cells, 1,150 m), along which the border runs; lowland and wetland species on one side, montane on the other"}
+    - {lat: 41.37, lon: 71.57, layer: faunal_regions, reason: "northern rim of the Fergana valley at Namangan: valley floor (median 1,020 m, 12 km from the line) against the Chatkal foothills (1,340 m); the edge lies a median 2.5 km from the border and within 1 km of it for only 22 % of its length, the regions differ across the line at only 29 % of pairs 3 km either side, and no species is one-sided at matched heights"}
+    - {lat: 42.51, lon: 58.29, layer: faunal_regions, reason: "margin of the lower Amu Darya delta lowland (median 60 m against 120-135 m beyond it); the edge lies a median 2.3 km from the border and within 1 km of it for only 10 % of its length, the regions differ across the line at only 29 % of pairs 3 km either side, and no species is one-sided across it"}
+    - {lat: 39.56, lon: 63.12, layer: faunal_regions, reason: "the middle Amu Darya, the divide between Karakum and Kyzylkum faunas; the edge lies a median 5.3 km from the border and within 1 km of it for only 8 % of its length, the regions differ across the line at only 6 % of pairs 3 km either side, and 1 species is one-sided at matched heights"}
 
 provinces:
   drop_outside_seeds: true     # parcel: provinces seeded only outside it drop out
