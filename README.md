@@ -1,42 +1,41 @@
-# Revised Ecoregions of the World
+# Biotic Regions of the World
 
-> **Frozen on 17 November 2026.** The work continues as **Biotic Regions of the World** at
-> [AsasHusain/Bioregions](https://github.com/AsasHusain/Bioregions).
->
-> **Why the project changed.** The aim was a map of regions with distinct native life. Testing showed that the maps
-> here fall short of it:
->
-> - A Floral Ecoregion is a connected area of one vegetation type. It maps a habitat, not a region with its own
->   community of plants and animals.
-> - Neither map predicted species at sealed test sites better than RESOLVE. In Iran, for birds, the Floral
->   Ecoregions did 2.9 % worse and the Faunal Ecoregions 0.9 % worse. The Floral Ecoregions matched RESOLVE only
->   when coarsened to its level of detail.
-> - Each area was built on its own and joined to its neighbours at national borders, so the type could change at a
->   border where two areas meet.
->
-> The new project maps one set of Biotic Regions: connected areas whose native plants and animals, taken together,
-> form a community distinct from those of their neighbours, each holding a mix of habitats. It uses its own
-> definition, with RESOLVE only as an outside benchmark. The vegetation and animal maps developed here become its
-> supporting layers.
->
-> The maps, results and code below are unchanged.
+A map of the world's regions of native life. A Biotic Region is a connected area whose native plants and animals,
+taken together, form a community distinct from those of its neighbours. Each region holds a characteristic mix of
+habitats: a riparian forest or a juniper belt is a habitat inside a region, not a region of its own.
 
-A new ecoregion map of the world, built to improve on the WWF/RESOLVE *Ecoregions 2017* map. Each area is mapped
-with the same method and published when it is finished. Every area has two maps:
+The project uses its own definition and evidence. Established maps such as RESOLVE *Ecoregions 2017* serve only as
+outside benchmarks in the tests.
 
-- **Floral Ecoregions**: regions of distinct natural vegetation.
-- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians.
+## Status
 
-## Progress
+The first Biotic Regions map is in development, for Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and
+Anatolia as one area. It will be built from four kinds of evidence on a 10 km grid:
+
+- native plant composition, modelled from plant records and vegetation plots;
+- native mammals, birds, reptiles and amphibians, from range maps;
+- the mix of natural vegetation types, from the vegetation map described below;
+- climate, terrain, soils and geology.
+
+Each kind of evidence is kept only if it improves predictions of species at places not used to build the map. Every
+cell shows how much plant evidence supports it, and cells with little evidence are marked provisional. The method is
+described in [`docs/plan.md`](docs/plan.md).
+
+## Earlier maps
+
+Before the Biotic Regions, the project published two maps per area as Revised Ecoregions of the World, now frozen at
+[AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions). They are kept here as finished products with
+their test results:
+
+- **Floral Ecoregions**: connected areas of one natural vegetation type. They become the vegetation layer of the
+  Biotic Regions.
+- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians. They become the animal layer.
 
 | Area | Version | Land area | Floral Ecoregions | Types | Faunal Ecoregions | Maps |
 |---|---|---|---|---|---|---|
 | Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan | 0.6.0 | 1,240,537 km² | 109 | 17 | 19 | [floral](outputs/central-asia/ecoregions_map_v0.6.0.png) · [faunal](outputs/central-asia/faunal_map_v0.6.0.png) |
 | Pakistan, Afghanistan & Iran | 0.5.0 | 3,281,449 km² | 165 | 44 | 20 | [floral](outputs/pak-afg-irn/ecoregions_map_v0.5.0.png) · [faunal](outputs/pak-afg-irn/faunal_map_v0.5.0.png) |
 | Texas | 0.2.0 | 685,641 km² | 31 | 19 | 12 | [floral](outputs/texas/ecoregions_map_v0.2.0.png) · [faunal](outputs/texas/faunal_map_v0.2.0.png) |
-| **Total** | | **5,207,627 km²** | **305** | | | **3.5 % of the world's land** |
-
-Next: Central Asia.
 
 | Date | Done |
 |---|---|
@@ -46,35 +45,36 @@ Next: Central Asia.
 | 2026-11-11 | Pakistan & Afghanistan v0.4.2; Texas v0.1.0 |
 | 2026-11-12 | Texas v0.2.0 |
 | 2026-11-13 | Pakistan, Afghanistan & Iran v0.5.0, with the first confirmation test |
-| 2026-11-14 | Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0), the first area built as a parcel and joined at its border |
+| 2026-11-14 | Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0) |
+| 2026-11-17 | The project becomes Biotic Regions of the World |
 
-## How the maps are made
+### How the earlier maps were made
 
 **Floral Ecoregions.** Natural vegetation communities are mapped at 90 m resolution from explicit rules on terrain,
-climate, soils, geology and water ([`communities.yaml`](communities.yaml)). Communities are grouped into types, and
-each Floral Ecoregion is one continuous area of one type, with boundaries following landforms. Each type is assigned
-a biome.
+climate, soils, geology and water (the `communities*.yaml` files). Communities are grouped into types, and each Floral Ecoregion is one continuous area of one type, with
+boundaries following landforms.
 
 **Faunal Ecoregions.** Areas with distinct animal communities, grouped from IUCN and BirdLife range maps of mammals,
 birds, reptiles and amphibians on 10 km cells.
 
-**Testing.** The maps are compared with RESOLVE on how well they predict the species recorded in GBIF at places not
+**Testing.** The maps were compared with RESOLVE on how well they predict the species recorded in GBIF at places not
 used to build them. Half the sample cells are held out for this. Because those held-out results were looked at
 during development, they count as exploratory. A stricter test uses records sealed before work on an area begins and
 opened once, after the map is frozen; its rules are fixed in advance in
 [`docs/preregistration.md`](docs/preregistration.md). Every analysis is listed in [`docs/ledger.md`](docs/ledger.md).
 
+Neither earlier map was shown to predict species better than RESOLVE on sealed records. The Floral Ecoregions are
+finer than the bird data can support and reach parity with RESOLVE only at RESOLVE's level of detail.
+
 Results below are the change in prediction error relative to RESOLVE (positive: ours better), with 95 % intervals.
 
-## Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0)
+### Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0)
 
 [![Floral Ecoregions of Central Asia](outputs/central-asia/ecoregions_map_v0.6.0_preview.png)](outputs/central-asia/ecoregions_map_v0.6.0.png)
 
 [![Faunal Ecoregions of Central Asia](outputs/central-asia/faunal_map_v0.6.0_preview.png)](outputs/central-asia/faunal_map_v0.6.0.png)
 
-Built on its own with a 75 km strip into Afghanistan and Iran for context, then clipped at the border, so the
-Pakistan, Afghanistan & Iran map is unchanged. The Turan lowland divides into the Karakum and Kyzylkum sand deserts,
-the Ustyurt gypsum desert, solonchaks and takyrs, and tugai forest along the rivers; the foothills from the Kopet Dagh
+The Turan lowland divides into the Karakum and Kyzylkum sand deserts, the Ustyurt gypsum desert, solonchaks and takyrs, and tugai forest along the rivers; the foothills from the Kopet Dagh
 to the Fergana Valley are semi-savanna on loess; the Tien Shan and Pamir-Alay rise through walnut-fruit forest,
 juniper woodland, spruce forest and mountain steppe to alpine meadow and cold desert.
 
@@ -93,7 +93,7 @@ count check now keeps a margin. As in Iran, plants favour the Floral Ecoregions 
 Floral Ecoregions are finer than the bird data can resolve. Most Floral Ecoregions here have too few plant records
 to test one by one (25,540 records over 1.24 million km²).
 
-## Pakistan, Afghanistan & Iran (v0.5.0)
+### Pakistan, Afghanistan & Iran (v0.5.0)
 
 [![Floral Ecoregions of Pakistan, Afghanistan & Iran](outputs/pak-afg-irn/ecoregions_map_v0.5.0_preview.png)](outputs/pak-afg-irn/ecoregions_map_v0.5.0.png)
 
@@ -114,7 +114,7 @@ The gain seen on held-out cells did not hold up for birds on the sealed records.
 Floral Ecoregions are finer than the bird data can support (they reach parity with RESOLVE at RESOLVE's level of
 detail), and that the Faunal Ecoregions are level with RESOLVE.
 
-## Texas (v0.2.0)
+### Texas (v0.2.0)
 
 [![Floral Ecoregions of Texas](outputs/texas/ecoregions_map_v0.2.0_preview.png)](outputs/texas/ecoregions_map_v0.2.0.png)
 
@@ -170,7 +170,7 @@ On Windows without `make`: `bash scripts/build_all.sh` from Git Bash. Raw downlo
 | BirdLife bird distribution maps 2025 | Faunal Ecoregions | BirdLife International and Handbook of the Birds of the World 2025 | BirdLife terms (non-commercial) |
 | EltonTraits 1.0 | body mass for the megafauna lists | Wilman et al. 2014, *Ecology* 95: 2027, doi:10.6084/m9.figshare.3559887 | CC0 |
 | GBIF occurrence downloads | testing, audit | GBIF.org 2026, doi:10.15468/dl.22b9a4, doi:10.15468/dl.6t43nn, doi:10.15468/dl.gv4z7m, doi:10.15468/dl.u2kux5, doi:10.15468/dl.77g6hc | per record; only aggregates stored |
-| RESOLVE Ecoregions 2017 | biomes, comparison | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
+| RESOLVE Ecoregions 2017 | biome labels of the earlier maps; comparison | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
 | EPA Level III and IV ecoregions | comparison only (Texas) | Griffith et al. 2007, *Ecoregions of Texas*, U.S. EPA | public domain |
 | Jung et al. 2020 habitat map; Hengl et al. 2018 potential natural vegetation | checks of the vegetation rules | Jung et al. 2020, *Sci. Data* 7: 220; Hengl et al. 2018, *PeerJ* 6: e5457 | CC BY 4.0 |
 | WhiteboxTools | geomorphons | Lindsay 2016, *Comput. Geosci.* 95: 75–84 | MIT |
@@ -187,9 +187,9 @@ Copyright © 2026 Asas Husain. All rights not granted below are reserved.
   teaching, personal study, public-interest organisations) and must pass on the line beginning
   `Required Notice:` in `LICENSE`. Any commercial use needs a separate written licence from the author.
 * **Maps and derived data** (`outputs/`, the static maps): [CC BY-NC
-  4.0](https://creativecommons.org/licenses/by-nc/4.0/). Credit: "Husain, A. (2026) Revised
-  Ecoregions of the World: <area>, vX.Y.Z. https://github.com/AsasHusain/Ecoregions", plus
-  the source attributions above. No commercial use without written permission.
+  4.0](https://creativecommons.org/licenses/by-nc/4.0/). Credit for the earlier maps: "Husain, A.
+  (2026) Revised Ecoregions of the World: <area>, vX.Y.Z. https://github.com/AsasHusain/Ecoregions",
+  plus the source attributions above. No commercial use without written permission.
 * **Third-party material keeps its own terms.** The source datasets are cited above and their raw files are never redistributed. Several (IUCN and BirdLife ranges,
   some GBIF records) are licensed for non-commercial use only, which the derived products inherit.
 * **Commercial licensing and permissions:** contact the author through GitHub (@AsasHusain).
