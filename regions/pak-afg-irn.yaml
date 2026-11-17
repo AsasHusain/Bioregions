@@ -201,13 +201,16 @@ provinces:
     - code: "23"
       name: Amu Darya Plains (incl. Balkh, Kunduz, Jowzjan, Faryab)
       family: plains
-      seeds: [[66.9, 36.75], [68.85, 36.7], [65.8, 36.9], [64.8, 36.4], [69.5, 37.0], [64.3, 36.0], [69.9, 37.45]]
+      seeds: [[66.9, 36.75], [68.85, 36.7], [65.8, 36.9], [64.8, 36.4], [69.5, 37.0], [64.3, 36.0], [69.9, 37.45],
+              [67.23, 37.22], [67.91, 37.04], [68.41, 37.14], [68.93, 37.28], [69.46, 37.27], [69.83, 37.58]]   # added 2026-11-17: the Panj and Amu Darya channel, Termez to Darqad, so the floodplain lies in one province, with its edge on the terrace margin, not the river
+            # added 2026-11-17: the Panj and Amu Darya channel from Termez to Darqad, so the floodplain lies in one province and its edge on the terrace margin, not the river
+      seeds_more: [[67.23, 37.22], [67.91, 37.04], [68.41, 37.14], [68.93, 37.28], [69.46, 37.27], [69.83, 37.58]]
       # added 2026-11-17: Faryab and the Afghan bank of the Panj, for parcels whose strip holds no other seed of it
     - code: "24"
       name: Paropamisus (incl. Herat, Badghis)
       region: Central Afghan Highlands
       family: ranges
-      seeds: [[62.2, 34.35], [63.2, 35.0], [64.2, 35.2], [62.8, 34.0], [61.8, 35.8], [62.5, 36.1], [63.9, 36.4]]
+      seeds: [[62.2, 34.35], [63.2, 35.0], [64.2, 35.2], [62.8, 34.0], [61.8, 35.8], [62.5, 36.1], [63.9, 36.4], [61.05, 35.85], [63.4, 35.75]]   # last two, added 2026-11-17: the Pol-e Khatun pistachio hills on the Iranian bank of the Tejen and the Bala Murghab hills on the Afghan bank of the Murghab, the same Badkhyz upland
       # seeds: one list for every area (2026-11-17); a province seeded only outside an area drops out there
     - code: "25"
       name: Helmand Basin (incl. Registan, Dasht-i-Margo, Sistan, Kandahar)
@@ -304,7 +307,7 @@ provinces:
       name: Ustyurt Plateau
       region: Turan Lowland
       family: plateaus
-      seeds: [[56.5, 43.0], [57.5, 44.0], [56.2, 44.6], [57.2, 42.4]]
+      seeds: [[56.5, 43.0], [57.5, 44.0], [56.2, 44.6], [57.2, 42.4], [58.5, 42.8]]   # last, added 2026-11-17: the plateau above the delta escarpment
     - code: "43"
       name: Kyzylkum Desert
       region: Turan Lowland
@@ -314,7 +317,7 @@ provinces:
       name: Amu Darya Delta & Aralkum (incl. Khorezm)
       region: Turan Lowland
       family: plains
-      seeds: [[60.6, 41.5], [59.6, 42.5], [59.1, 43.5], [60.4, 44.4], [61.4, 43.2]]
+      seeds: [[60.6, 41.5], [59.6, 42.5], [59.1, 43.5], [60.4, 44.4], [61.4, 43.2], [58.0, 42.35]]   # last, added 2026-11-17: the Daryalyk lowland below the escarpment
     - code: "45"
       name: Middle Amu Darya Valley (Lebap)
       region: Turan Lowland
@@ -500,8 +503,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_pak-afg-irn.yaml
 assemble:
-  faunal_k: 118                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 345 border-clipped range maps left out, 8 of them reviewed in config faunal.clipped_known): 8 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (15, 8, 15, 19, 13, 13, 14, 21)
-  faunal_group_k: 8            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
+  faunal_k: 123                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 354 border-clipped range maps left out, 12 reviewed in config faunal.clipped_known): 7 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (16, 24, 15, 19, 17, 13, 19)
+  faunal_group_k: 7            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
 confirmation:   # docs/preregistration.md: Iran's records in these squares and their buffer are sealed until the map is frozen
   area: IRN
   mask: docs/confirmation/iran_mask.json
@@ -513,6 +516,6 @@ confirmation:   # docs/preregistration.md: Iran's records in these squares and t
   open: true             # opened 2026-11-13 after the freeze commit 6c3d523 (hash in docs/ledger.md)
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351   # SHA-256 of outputs/pak-afg-irn/ecoregions.gpkg at the freeze (v0.5.0)
 faunal:
-  k_maps: [8, 118]            # 118 regions grouped into 8, shared by the three areas (assemble.faunal_k / faunal_group_k)
+  k_maps: [7, 123]            # 123 regions grouped into 7, shared by the three areas (assemble.faunal_k / faunal_group_k)
 plots:   # docs/preregistration.md: the frozen v0.5.0 map, hashed before Iran's sPlotOpen plots are opened
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351

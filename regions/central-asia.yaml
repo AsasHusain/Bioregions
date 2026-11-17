@@ -87,6 +87,7 @@ bordercheck:
   accept:
     - {lat: 37.25, lon: 65.04, layer: provinces, reason: "margin of the Amu Darya valley floor (height above the channel 1.2 -> 0.2), along which the border was drawn"}
     - {lat: 37.53, lon: 65.67, layer: provinces, reason: "the Amu Darya in its floodplain; tugai covers both banks in both provinces, so no type changes at the river"}
+    - {lat: 41.38, lon: 71.57, layer: provinces, reason: "northern rim of the Fergana valley at Namangan: the edge lies on the foot of the Chatkal hills, valley floor 900-1,200 m against foothills 1,300-2,000 m within 10 km, the same break accepted for the Faunal layer"}
     - {lat: 39.85, lon: 69.31, layer: faunal_regions, reason: "foot of the Turkestan Range, where the Fergana floor (Tajik cells, median 1,100 m) meets the foothills (Kyrgyz cells, 1,640 m); the border was drawn along the same foot, and at matched heights only 4 of 1,695 species differ"}
     - {lat: 40.22, lon: 69.81, layer: faunal_regions, reason: "edge of the Fergana valley floor (Tajik cells, median 530 m) against the Alai foothills (Kyrgyz cells, 1,150 m), along which the border runs; lowland and wetland species on one side, montane on the other"}
     - {lat: 41.37, lon: 71.57, layer: faunal_regions, reason: "northern rim of the Fergana valley at Namangan: valley floor (median 1,020 m, 12 km from the line) against the Chatkal foothills (1,340 m); the edge lies a median 2.5 km from the border and within 1 km of it for only 22 % of its length, the regions differ across the line at only 29 % of pairs 3 km either side, and no species is one-sided at matched heights"}
@@ -218,14 +219,18 @@ provinces:
     - code: "23"
       name: Amu Darya Plains (incl. Balkh, Kunduz, Jowzjan, Faryab)
       family: plains
-      seeds: [[66.9, 36.75], [68.85, 36.7], [65.8, 36.9], [64.8, 36.4], [69.5, 37.0], [64.3, 36.0], [69.9, 37.45]]
+      seeds: [[66.9, 36.75], [68.85, 36.7], [65.8, 36.9], [64.8, 36.4], [69.5, 37.0], [64.3, 36.0], [69.9, 37.45],
+              [67.23, 37.22], [67.91, 37.04], [68.41, 37.14], [68.93, 37.28], [69.46, 37.27], [69.83, 37.58]]   # added 2026-11-17: the Panj and Amu Darya channel, Termez to Darqad, so the floodplain lies in one province, with its edge on the terrace margin, not the river
+            # added 2026-11-17: the Panj and Amu Darya channel from Termez to Darqad, so the floodplain lies in one province and its edge on the terrace margin, not the river
+      seeds_more: [[67.23, 37.22], [67.91, 37.04], [68.41, 37.14], [68.93, 37.28], [69.46, 37.27], [69.83, 37.58]]
       # added 2026-11-17: Faryab and the Afghan bank of the Panj, for parcels whose strip holds no other seed of it
     - code: "24"
       name: Paropamisus (incl. Herat, Badghis)
       region: Central Afghan Highlands
       family: ranges
       seeds: [[62.2, 34.35], [63.2, 35.0], [64.2, 35.2], [62.8, 34.0],
-              [61.8, 35.8], [62.5, 36.1], [63.9, 36.4]]   # Badkhyz and Karabil (Turkmenistan)
+              [61.8, 35.8], [62.5, 36.1], [63.9, 36.4],   # Badkhyz and Karabil (Turkmenistan)
+              [61.05, 35.85], [63.4, 35.75]]   # added 2026-11-17: the Pol-e Khatun pistachio hills on the Iranian bank of the Tejen and the Bala Murghab hills on the Afghan bank of the Murghab, the same Badkhyz upland
     - code: "25"
       name: Helmand Basin (incl. Registan, Dasht-i-Margo, Sistan, Kandahar)
       family: deserts
@@ -323,7 +328,7 @@ provinces:
       name: Ustyurt Plateau
       region: Turan Lowland
       family: plateaus
-      seeds: [[56.5, 43.0], [57.5, 44.0], [56.2, 44.6], [57.2, 42.4]]
+      seeds: [[56.5, 43.0], [57.5, 44.0], [56.2, 44.6], [57.2, 42.4], [58.5, 42.8]]   # last, added 2026-11-17: the plateau above the delta escarpment
     - code: "43"
       name: Kyzylkum Desert
       region: Turan Lowland
@@ -333,7 +338,7 @@ provinces:
       name: Amu Darya Delta & Aralkum (incl. Khorezm)
       region: Turan Lowland
       family: plains
-      seeds: [[60.6, 41.5], [59.6, 42.5], [59.1, 43.5], [60.4, 44.4], [61.4, 43.2]]
+      seeds: [[60.6, 41.5], [59.6, 42.5], [59.1, 43.5], [60.4, 44.4], [61.4, 43.2], [58.0, 42.35]]   # last, added 2026-11-17: the Daryalyk lowland below the escarpment
     - code: "45"
       name: Middle Amu Darya Valley (Lebap)
       region: Turan Lowland
@@ -522,8 +527,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_central-asia.yaml
 assemble:
-  faunal_k: 118                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 345 border-clipped range maps left out, 8 of them reviewed in config faunal.clipped_known): 8 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (15, 8, 15, 19, 13, 13, 14, 21)
-  faunal_group_k: 8            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
+  faunal_k: 123                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 354 border-clipped range maps left out, 12 reviewed in config faunal.clipped_known): 7 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (16, 24, 15, 19, 17, 13, 19)
+  faunal_group_k: 7            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
 confirmation:   # docs/preregistration.md, section 8: sealed squares of the world mask inside Central Asia (rank cut-off from
   # scripts/sealed_counts.py, record counts only); their records and buffer are not read until the map is frozen
   world_mask: docs/confirmation/world_mask.json
@@ -533,4 +538,4 @@ confirmation:   # docs/preregistration.md, section 8: sealed squares of the worl
   open: true                   # opened once on the frozen v0.6.0 (2026-11-14)
   map_sha256: b1851f842df76626257fb01aea52a5fdcf6a13c74cfc505e4962c933ffe9eec8   # v0.6.0, frozen 2026-11-14
 faunal:
-  k_maps: [8, 118]            # 118 regions grouped into 8, shared by the three areas (assemble.faunal_k / faunal_group_k)
+  k_maps: [7, 123]            # 123 regions grouped into 7, shared by the three areas (assemble.faunal_k / faunal_group_k)
