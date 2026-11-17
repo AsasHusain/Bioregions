@@ -43,13 +43,15 @@ def beta_sim(X: sp.spmatrix) -> np.ndarray:
     X = sp.csr_matrix(X, dtype=np.float32)
     a = (X @ X.T).toarray()
     s = np.asarray(X.sum(axis=1)).ravel()
-    b = s[:, None] - a
-    c = s[None, :] - a
-    m = np.minimum(b, c)
+    # min(b, c) / (a + min(b, c)) with b = s_i - a, c = s_j - a is 1 - a / min(s_i, s_j); two n x n arrays, not five
+    mn = np.minimum.outer(s, s)
     with np.errstate(invalid="ignore", divide="ignore"):
-        d = np.where(a + m > 0, m / (a + m), 1.0)
-    np.fill_diagonal(d, 0.0)
-    return d.astype("float32")
+        np.divide(a, mn, out=a)
+    np.subtract(1.0, a, out=a)
+    a[mn == 0] = 1.0
+    del mn
+    np.fill_diagonal(a, 0.0)
+    return a.astype("float32", copy=False)
 
 
 def explained_turnover(dv: np.ndarray, i: np.ndarray, j: np.ndarray, labels: np.ndarray) -> float:
