@@ -74,6 +74,9 @@ sources:
         doi: 10.15468/dl.tywnkz        # Turkiye, Armenia, Azerbaijan, Georgia plus a margin; all taxa (sealed records filtered out)
         url: https://api.gbif.org/v1/occurrence/download/request/0007079-261110092616502.zip
         records: 7653713
+bordercheck:
+  accept:
+    - {lat: 40.89, lon: 43.61, layer: faunal_regions, reason: "Akhurian valley: a tongue of the Aras lowland fauna (Merops persicus, Paralaudakia caucasia, Eremias strauchi) follows the lowest cells north along the river (lowest point 1,280-1,470 m, against 1,550-2,100 m on the plateaus either side); the border runs down the river, so both edges of the tongue lie within 10 km of it, and across it at matched heights only 1 species differs"}
 provinces:
   drop_outside_seeds: true     # parcel: provinces seeded only outside it drop out
   units:
