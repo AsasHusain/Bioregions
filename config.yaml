@@ -282,6 +282,18 @@ faunal:
   megafauna_kg: {MAMMALIA: 10, AVES: 2}   # adult body mass (EltonTraits 1.0) for the megafauna list
   megafauna_min_share: 0.03    # megafauna listed where their range covers at least this share of the region
   megafauna_reptile_genera: [Crocodylus, Gavialis, Varanus, Python]   # reptiles have no comparable mass data
+  # range maps that stop at a border over stretches shorter than the clipped-range test's 100 km (at 50 km the test
+  # flags about as many species at borders shifted 40 km as at the real ones), found one-sided at matched heights where
+  # a Faunal edge followed a border; each species is known on both sides. Left out of the joint Faunal Ecoregions.
+  clipped_known:
+    Columba livia: "Aras (Nakhchivan-Iran): mapped only in Nakhchivan; resident throughout Iran"
+    Sturnus vulgaris: "Aras: mapped only in Nakhchivan; breeds in Iranian Azerbaijan"
+    Ciconia ciconia: "Aras: mapped only on the Iranian side; breeds in Nakhchivan and the Ararat plain"
+    Hieraaetus pennatus: "Aras: mapped only in Nakhchivan; breeds in northwestern Iran"
+    Ovis gmelini: "Aras: mapped only on the Iranian side; the Armenian mouflon lives in Nakhchivan"
+    Coracias garrulus: "Khost-Waziristan: mapped only in Afghanistan; breeds in northwestern Pakistan"
+    Capra aegagrus: "Iran-Pakistan line in Makran: mapped only in Iran; the wild goat lives in Pakistani Balochistan"
+    Ursus thibetanus: "Iran-Pakistan line in Makran: mapped only in Iran; the Baluchistan black bear lives on both sides"
 
 # ---------------------------------------------------------------------------
 # v0.2 community ecoregions (types in communities.yaml -> ecoregion_types)

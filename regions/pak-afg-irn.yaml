@@ -295,8 +295,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_pak-afg-irn.yaml
 assemble:
-  faunal_k: 125                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 337 border-clipped range maps left out): 7 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (17, 9, 17, 17, 30, 19, 16)
-  faunal_group_k: 7            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
+  faunal_k: 118                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 345 border-clipped range maps left out, 8 of them reviewed in config faunal.clipped_known): 8 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (15, 8, 15, 19, 13, 13, 14, 21)
+  faunal_group_k: 8            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
 confirmation:   # docs/preregistration.md: Iran's records in these squares and their buffer are sealed until the map is frozen
   area: IRN
   mask: docs/confirmation/iran_mask.json
@@ -308,6 +308,6 @@ confirmation:   # docs/preregistration.md: Iran's records in these squares and t
   open: true             # opened 2026-11-13 after the freeze commit 6c3d523 (hash in docs/ledger.md)
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351   # SHA-256 of outputs/pak-afg-irn/ecoregions.gpkg at the freeze (v0.5.0)
 faunal:
-  k_maps: [7, 125]            # 125 regions grouped into 7, shared by the three areas (assemble.faunal_k / faunal_group_k)
+  k_maps: [8, 118]            # 118 regions grouped into 8, shared by the three areas (assemble.faunal_k / faunal_group_k)
 plots:   # docs/preregistration.md: the frozen v0.5.0 map, hashed before Iran's sPlotOpen plots are opened
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351

@@ -170,6 +170,8 @@ def run(areas: list[str], bin_km=25.0) -> dict:
         data[r] = dict(cfg=cfg, grid=grid, cells=cells, X=Xg, inside=inside,
                        bx=np.floor(np.asarray(x) / (bin_km * 1000)).astype(int),
                        by=np.floor(np.asarray(y) / (bin_km * 1000)).astype(int))
+    for n in fc.get("clipped_known", {}):  # reviewed: stops at a border over a stretch too short for the test
+        clipped.setdefault(n, []).append("reviewed")
     keep = np.array([n not in clipped for n in sorted(names, key=names.get)])
     names_list = [n for n, k in zip(sorted(names, key=names.get), keep) if k]
     S = len(names_list)
