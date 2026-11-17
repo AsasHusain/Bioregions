@@ -383,3 +383,4 @@ plots:                          # confirmatory vegetation-plot tests (plots stag
 # ---------------------------------------------------------------------------
 world:
   areas: [texas, pak-afg-irn, central-asia]
+  joint_faunal: [pak-afg-irn, central-asia, caucasus-anatolia]  # one Faunal clustering (joint_faunal), one numbering

@@ -4,10 +4,12 @@ Areas are built as parcels, and each is clipped at the border of the countries i
 them together. Each area's units are fitted to its mapped area: the thin slivers its 90 m raster edge leaves along a
 seam with another area go to the unit they touch most (lakes and coasts are left alone). Floral Ecoregions of one
 type that meet across a seam become one unit, named after its larger part, and types are dissolved over all areas.
-Faunal Ecoregions are laid side by side until one faunal clustering covers every area (each area numbers its own).
+Faunal Ecoregions of the areas clustered together (``world.joint_faunal``) share one numbering, and each is dissolved
+across the seams; other areas' Faunal Ecoregions are laid side by side.
 
 The border gate (``bordercheck.judge``) then runs on the merged map, with elevation from GMTED2010 and rainfall from
 the areas' CHELSA clips: where a type still changes along a border at a seam, the change must be a natural break.
+Borders inside one area are left to that area's own gate; the areas' reviewed exceptions apply here too.
 
     PYTHONPATH=src python -m ecoregions.world
 
@@ -153,7 +155,7 @@ def types(units: gpd.GeoDataFrame, per_area: gpd.GeoDataFrame) -> gpd.GeoDataFra
         r["countries"] = combine(g.countries, w)
         r["community_mix"] = combine(g.community_mix, w)
         r["faunal_names"] = "; ".join(dict.fromkeys(n for s in g.faunal_names.astype(str) for n in s.split("; ") if n))
-        u = units[units.type == t]
+        u = units[units["type"] == t]
         r["n_ecoregions"] = len(u)
         r["geometry"] = shapely.union_all(u.geometry.values)
         r["area_km2"] = r["geometry"].area / 1e6
@@ -215,7 +217,8 @@ def run(areas: list[str]) -> None:
         fl.append(fit(gpd.read_file(gpkg, layer="ecoregions").to_crs(CRS), shapes[r], seam[r]).assign(parcel=r))
         ty.append(gpd.read_file(gpkg, layer="ecoregion_types").to_crs(CRS).assign(parcel=r))
         f = gpd.read_file(gpkg, layer="faunal_regions").to_crs(CRS)
-        fa.append(fit(f, shapes[r], seam[r]).assign(parcel=r, key=lambda d: r + ":" + d.faunal_region.astype(str)))
+        own = "joint" if r in load_config()["world"].get("joint_faunal", []) else r  # areas clustered together share numbers
+        fa.append(fit(f, shapes[r], seam[r]).assign(parcel=r, key=lambda d: own + ":" + d.faunal_region.astype(str)))
         pv.append(gpd.read_file(Paths(c).outputs / "physiographic.gpkg", layer="l2_provinces").to_crs(CRS)[["code", "geometry"]])
     cty = display_countries(countries, disputed).to_crs(CRS)
     # strip agreement (declared 2026-11-14 before any result): where an area's 75 km strip lies in a neighbour's
@@ -234,7 +237,7 @@ def run(areas: list[str]) -> None:
             if ov.empty:
                 continue
             a = ov.area
-            agree.append(dict(strip_of=r, inside=q, km2=round(a.sum() / 1e6), same_type=round(a[ov.type == ov.type_q].sum() / a.sum(), 3)))
+            agree.append(dict(strip_of=r, inside=q, km2=round(a.sum() / 1e6), same_type=round(a[ov["type"] == ov.type_q].sum() / a.sum(), 3)))
             log.info("world: %s's strip in %s: %.0f km², same type on %.1f %%", r, q, a.sum() / 1e6, 100 * agree[-1]["same_type"])
     pd.DataFrame(agree, columns=["strip_of", "inside", "km2", "same_type"]).to_csv(out_dir / "strip_agreement.csv", index=False)
     low = [a for a in agree if a["km2"] >= 1000 and a["same_type"] < 0.90]
@@ -242,7 +245,10 @@ def run(areas: list[str]) -> None:
     units = units.sort_values(["type", "area_km2"], ascending=[True, False]).reset_index(drop=True)
     units["unit"] = np.arange(1, len(units) + 1)
     tys = types(units, pd.concat(ty, ignore_index=True))
-    faunal = gpd.GeoDataFrame(pd.concat(fa, ignore_index=True), crs=CRS)
+    faunal = gpd.GeoDataFrame(pd.concat(fa, ignore_index=True), crs=CRS).sort_values("area_km2", ascending=False)
+    parcels = faunal.groupby("key").parcel.agg(lambda p: "+".join(dict.fromkeys(p)))
+    faunal = faunal.dissolve("key", aggfunc="first").assign(parcel=parcels).reset_index()  # attributes of the larger part
+    faunal["area_km2"] = faunal.area / 1e6
     prov = gpd.GeoDataFrame(pd.concat(pv, ignore_index=True), crs=CRS).dissolve("code").reset_index()
     gpkg = out_dir / "ecoregions.gpkg"
     gpkg.unlink(missing_ok=True)
@@ -261,9 +267,14 @@ def run(areas: list[str]) -> None:
     bc = cfgs[joined[0]].get("bordercheck", {})
     tol, min_km = bc.get("tol_km", 10.0), bc.get("min_km", 50.0)
     sel = lambda g: g[g.intersects(box)]  # noqa: E731
+    accept = [a for c in cfgs.values() for a in c.get("bordercheck", {}).get("accept", [])]
     rows = bordercheck.judge("ecoregions", sel(units), countries.to_crs(CRS), rs, tr, tol, min_km,
-                             bordercheck.internal_boundaries(sel(prov)))
-    rows += bordercheck.judge("faunal_regions", sel(faunal), countries.to_crs(CRS), rs, tr, tol, min_km)
+                             bordercheck.internal_boundaries(sel(prov)), accept=accept)
+    rows += bordercheck.judge("faunal_regions", sel(faunal), countries.to_crs(CRS), rs, tr, tol, min_km, accept=accept)
+    # borders inside one area were judged by that area's gate (six layers at 270 m); this one judges the seams
+    at_seam = shapely.union_all(list(seam.values())).buffer(2 * tol * 1000)
+    mid = gpd.GeoSeries(gpd.points_from_xy([r["lon"] for r in rows], [r["lat"] for r in rows]), crs=4326).to_crs(CRS)
+    rows = [r for r, m in zip(rows, mid) if at_seam.contains(m)]
     pd.DataFrame(rows, columns=bordercheck.COLS).to_csv(out_dir / "bordercheck.csv", index=False)
     bad = [r for r in rows if r["verdict"] == "ARTEFACT"]
     if bad or low:
