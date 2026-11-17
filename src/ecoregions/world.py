@@ -7,8 +7,8 @@ type that meet across a seam become one unit, named after its larger part, and t
 Faunal Ecoregions of the areas clustered together (``world.joint_faunal``) share one numbering, and each is dissolved
 across the seams; other areas' Faunal Ecoregions are laid side by side.
 
-The border gate (``bordercheck.judge``) then runs on the merged map, with elevation from GMTED2010 and rainfall from
-the areas' CHELSA clips: where a type still changes along a border at a seam, the change must be a natural break.
+The border gate (``bordercheck.judge``) then runs on the merged map, on the six layers of the area gates mosaicked
+from the areas: where a type still changes along a border at a seam, the change must be a natural break.
 Borders inside one area are left to that area's own gate; the areas' reviewed exceptions apply here too.
 
     PYTHONPATH=src python -m ecoregions.world
@@ -167,10 +167,11 @@ def types(units: gpd.GeoDataFrame, per_area: gpd.GeoDataFrame) -> gpd.GeoDataFra
     return out
 
 
-def rasters(bounds_lonlat, res=1000.0, within=None):
-    """Elevation (GMTED2010 mean, 30") and annual rainfall (the areas' CHELSA clips) on one equal-area grid, each with
-    its p90-p10 spread over ``within`` (EPSG:6933 geometry; the mapped areas, not the whole box: with Tibet in the box
-    the elevation spread was inflated, so elevation counted for less than rainfall in the contrast)."""
+def rasters(bounds_lonlat, paths: list, res=1000.0, within=None):
+    """The area gates' six layers (elevation, rainfall, soil sand, height above the channel, dune texture, slope),
+    mosaicked from the areas' 270 m feature grids onto one equal-area grid, each with its p90-p10 spread over
+    ``within`` (EPSG:6933 geometry; the mapped areas, not the whole box: with Tibet in the box the elevation spread was
+    inflated). Elevation and rainfall alone could not see a river terrace's edge (the Amu Darya)."""
     from affine import Affine
     from rasterio.warp import Resampling, reproject, transform_bounds
     import rasterio
@@ -179,9 +180,9 @@ def rasters(bounds_lonlat, res=1000.0, within=None):
     width, height = int((e - w) / res) + 1, int((n - s) / res) + 1
     tr = Affine(res, 0, w, 0, -res, n)
     out = []
-    srcs = [[f"/vsizip/{ROOT / 'data/raw/gmted2010/mn30_grd.zip'}/mn30_grd"],
-            sorted(str(p) for p in (ROOT / "data/raw/regions").glob("*/chelsa/CHELSA_bio12_*_clip.tif"))]
-    for files in srcs:
+    srcs = [[str(p.coarse(k)) for p in paths if p.coarse(k).exists()]
+            for k in ("elev", "bio12", "sand", "hand", "dune_frac", "slope")]
+    for files in filter(None, srcs):
         a = np.full((height, width), np.nan, "float32")
         for f in files:
             with rasterio.open(f) as src:
@@ -263,7 +264,7 @@ def run(areas: list[str]) -> None:
     if len(joined) < 2:
         return
     box = shapely.union_all([shapes[r] for r in joined])
-    rs, tr = rasters(gpd.GeoSeries([box], crs=CRS).to_crs(4326).total_bounds, within=box)
+    rs, tr = rasters(gpd.GeoSeries([box], crs=CRS).to_crs(4326).total_bounds, [Paths(cfgs[r]) for r in joined], within=box)
     bc = cfgs[joined[0]].get("bordercheck", {})
     tol, min_km = bc.get("tol_km", 10.0), bc.get("min_km", 50.0)
     sel = lambda g: g[g.intersects(box)]  # noqa: E731
