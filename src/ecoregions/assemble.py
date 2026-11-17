@@ -343,10 +343,10 @@ def run(cfg) -> None:
 
     # 5. snap at 90 m
     study = l3 > 0
+    del l3  # read again after snapping: on a large area each 90 m grid is ~3 GB
     lab = upsample(comp, f, grid.shape).astype(np.int32)
     lab[~study] = 0
-    par90 = upsample(par, f, grid.shape)
-    band = int(round(ac["snap_band_m"] / grid.res))
+    band =int(round(ac["snap_band_m"] / grid.res))
     unknown = ndi.maximum_filter(internal_edges(lab).astype("uint8"), size=2 * band + 1).astype(bool) | (study & (lab == 0))
     markers = np.where(unknown, 0, lab).astype(np.int32)
     del unknown
@@ -369,6 +369,8 @@ def run(cfg) -> None:
     del snapped
     write(paths.raster("ecoregions"), eco, grid, nodata=0)
     n = int(eco.max()) + 1
+    l3 = read(paths.raster("l3")).astype(np.int32)
+    par90 = upsample(par, f, grid.shape)
 
     # 6. attributes
     km2 = grid.cell_km2
