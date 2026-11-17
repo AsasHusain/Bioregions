@@ -136,10 +136,23 @@ def make_contiguous(lab: np.ndarray, min_new_px: int, rounds: int = 5) -> tuple[
     return lab, n
 
 
-def _contiguous_pass(lab: np.ndarray, min_new_px: int) -> tuple[np.ndarray, int, int]:
-    from skimage.measure import label as cc_label
+def components(lab: np.ndarray) -> np.ndarray:
+    """8-connected parts of each unit (as skimage's label, connectivity 2, background 0), labelled one unit at a time
+    within its bounding box: skimage's int64 output is ~6 GB on a large area."""
+    comp = np.zeros(lab.shape, np.int32)
+    nxt = 0
+    for u, sl in enumerate(ndi.find_objects(lab), start=1):
+        if sl is None:
+            continue
+        m = lab[sl] == u
+        c, n = ndi.label(m, structure=np.ones((3, 3), int), output=np.int32)
+        comp[sl][m] = c[m] + nxt
+        nxt += n
+    return comp
 
-    comp = cc_label(lab, connectivity=2, background=0).astype(np.int32)  # int64 is ~6 GB on a large area
+
+def _contiguous_pass(lab: np.ndarray, min_new_px: int) -> tuple[np.ndarray, int, int]:
+    comp = components(lab)
     ncomp = comp.max()
     sizes = np.bincount(comp.ravel(), minlength=ncomp + 1)
     comp_unit = np.zeros(ncomp + 1, lab.dtype)
