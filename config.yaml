@@ -294,6 +294,10 @@ faunal:
     Coracias garrulus: "Khost-Waziristan: mapped only in Afghanistan; breeds in northwestern Pakistan"
     Capra aegagrus: "Iran-Pakistan line in Makran: mapped only in Iran; the wild goat lives in Pakistani Balochistan"
     Ursus thibetanus: "Iran-Pakistan line in Makran: mapped only in Iran; the Baluchistan black bear lives on both sides"
+    Microgecko persicus: "Iran-Pakistan line in Makran: mapped only in Iran; recorded in Iran and Pakistan (Reptile Database: Iran; Pakistan, Bela to Haleji, Hab valley)"
+    Laudakia melanura: "Iran-Pakistan line in Makran: mapped only in Pakistan; ranges into SE Iran (Reptile Database: SE Iran, SE Afghanistan, Pakistan)"
+    Pterocles exustus: "Iran-Pakistan line in Makran: mapped only in Pakistan; subspecies hindustan in southeastern Iran, Pakistan and India (Wikipedia, Chestnut-bellied sandgrouse)"
+    Butastur teesa: "Iran-Pakistan line in Makran: mapped only in Pakistan; resident in Iran as well (Wikipedia, White-eyed buzzard)"
 
 # ---------------------------------------------------------------------------
 # v0.2 community ecoregions (types in communities.yaml -> ecoregion_types)

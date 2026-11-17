@@ -51,7 +51,7 @@ def check_settings(cfg, paths: Paths) -> list[str]:
     from .communities import load_rules
 
     codes = [u["code"] for u in cfg["provinces"]["units"]]
-    targets = cfg["segmentation"]["target_units"]
+    targets = {**cfg["segmentation"].get("target_units", {}), **cfg["segmentation"].get("unit_km2", {})}
     fallback = load_rules(paths.root / cfg["communities"]["rules"])["fallback"]
     out = [f"province {c}: no segmentation.target_units" for c in codes if c not in targets]
     out += [f"province {c}: no fallback community in {cfg['communities']['rules']}" for c in codes

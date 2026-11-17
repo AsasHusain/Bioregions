@@ -149,7 +149,9 @@ def segment_province(paths, cfg, pid: int, info: dict, l2: np.ndarray, valid: np
     n = ids.size
     A = adjacency(sp, n)
     M = label_means(sp, X, n)
-    k = int(min(sc["target_units"][info["code"]], n))
+    # unit_km2: units of one size wherever the province lies, so a parcel's strip is cut like the neighbour's own map
+    size = sc.get("unit_km2", {}).get(info["code"])
+    k = int(min(max(1, round(area / size)) if size else sc["target_units"][info["code"]], n))
     ncomp, comp = sparse.csgraph.connected_components(A, directed=False)
     if ncomp > 1:
         # islands / detached fragments: cluster the main body; fragments join the nearest unit later

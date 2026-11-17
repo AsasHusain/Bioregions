@@ -330,6 +330,21 @@ def run(cfg) -> None:
     n_units = int(l3.max()) + 1
     unit_fau = mode_per_label(l3c, fau270, n_units, int(fau.max()) + 1)
     par = unit_fau[l3c]
+    # units the mapped outline cuts on land (a seam with a neighbour) keep the 10 km labels: their majority would run
+    # up to the border, where the neighbour's units, cut on the other side, meet it with their own majority
+    from rasterio.features import rasterize
+
+    from .boundaries import load_boundaries, mapped_area
+
+    cg = grid.coarsen(f)
+    own = rasterize([(g, 1) for g in mapped_area(cfg, paths, *load_boundaries(paths)).to_crs(grid.crs).geometry],
+                    out_shape=l3c.shape, transform=cg.transform, fill=0).astype(bool)
+    land = block_mode(read(paths.raster("mask")), f) != 0
+    cut = np.unique(l3c[own & ndi.binary_dilation(land & ~own, iterations=2) & (l3c > 0)])
+    at_seam = np.isin(l3c, cut) & (fau270 > 0)
+    par[at_seam] = fau270[at_seam]
+    log.info("assemble: %d units cut by the land outline keep the 10 km faunal labels (%.1f%% of cells)",
+             len(cut), 100 * at_seam.sum() / max(1, (l3c > 0).sum()))
     par[l3c == 0] = 0
 
     # 4. connected areas of one type (faunal regions and provinces do not cut them)

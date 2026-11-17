@@ -532,3 +532,12 @@ def test_pixel_biome_key_follows_structure_then_climate():
     assert pixel_biomes(s, c, k).tolist() == ["Temperate Conifer Forests", "Temperate Grasslands, Savannas & Shrublands",
                                               "Deserts & Xeric Shrublands", "Tropical & Subtropical Grasslands, Savannas & Shrublands",
                                               "Mediterranean Forests, Woodlands & Scrub", "Rock & Ice", ""]
+
+
+def test_seed_cells_far_outside_grid_is_dropped_not_snapped():
+    from ecoregions.provinces import seed_cells
+    g = Grid("EPSG:4326", 10.0, 20.0, 0.01, 100, 100)  # 10-11 E, 19-20 N
+    valid = np.ones((100, 100), bool)
+    units = [{"code": "01", "name": "a", "seeds": [[9.0, 21.0], [10.5, 19.5], [9.95, 19.5]]}]  # far NW, inside, just W
+    (r, c), = seed_cells(units, g, valid, drop_outside=True)
+    assert list(zip(r, c)) == [(50, 50), (50, 0)]

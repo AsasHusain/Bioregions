@@ -158,7 +158,9 @@ def seed_cells(units, grid: Grid, valid: np.ndarray, drop_outside: bool = False)
             r, c = int(r), int(c)
             if not (0 <= r < grid.height and 0 <= c < grid.width) or not valid[r, c]:
                 # snap to the nearest valid cell within ~12 km (border/coast slop); fail beyond that
-                rr, cc = np.nonzero(valid[max(0, r - 15):r + 16, max(0, c - 15):c + 16])
+                # max(0, ...) on the stops too: a seed north or west of the grid has a negative stop, which would
+                # slice from the far edge and snap the seed hundreds of km away
+                rr, cc = np.nonzero(valid[max(0, r - 15):max(0, r + 16), max(0, c - 15):max(0, c + 16)])
                 if rr.size == 0:
                     if drop_outside:  # a parcel uses the provinces of a larger area: seeds beyond it are skipped
                         continue
