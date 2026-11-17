@@ -400,8 +400,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_caucasus-anatolia.yaml
 assemble:
-  faunal_k: 98                 # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 274 border-clipped range maps left out): 6 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (25, 14, 12, 16, 19, 12)
-  faunal_group_k: 6            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
+  faunal_k: 125                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 337 border-clipped range maps left out): 7 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (17, 9, 17, 17, 30, 19, 16)
+  faunal_group_k: 7            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
 confirmation:   # docs/preregistration.md, section 8: sealed squares of the world mask inside Central Asia (rank cut-off from
   # scripts/sealed_counts.py, record counts only); their records and buffer are not read until the map is frozen
   world_mask: docs/confirmation/world_mask.json
@@ -411,4 +411,4 @@ confirmation:   # docs/preregistration.md, section 8: sealed squares of the worl
   open: false
   map_sha256: null
 faunal:
-  k_maps: [6, 98]             # 98 regions grouped into 6, shared by the three areas (assemble.faunal_k / faunal_group_k)
+  k_maps: [7, 125]            # 125 regions grouped into 7, shared by the three areas (assemble.faunal_k / faunal_group_k)

@@ -108,8 +108,9 @@ def longest_runs(d: np.ndarray) -> np.ndarray:
 def clipped_species(grid, cells, X, names, countries, dem_path, off_m=12000.0, step_m=10000.0, min_km=100.0,
                     max_dz=300.0) -> set:
     """Species whose range map stops at an international border: present on one side and absent on the other at
-    pairs of cells ``off_m`` either side of the border, every ``step_m``, for at least ``min_km`` in a row, where
-    the two cells differ in height by less than ``max_dz`` (so neither height nor a crest explains it). IUCN and
+    pairs of cells ``off_m`` either side of the border, every ``step_m``, for at least ``min_km`` of consecutive
+    pairs whose two cells differ in height by less than ``max_dz`` (so neither height nor a crest explains it; pairs
+    on sloping ground between them are skipped). IUCN and
     BirdLife ranges drawn country by country end at borders (the Cape and woolly hares at the Iran-Pakistan line),
     and such a map cannot say where the species really stops."""
     import rasterio
@@ -136,8 +137,8 @@ def clipped_species(grid, cells, X, names, countries, dem_path, off_m=12000.0, s
             good = (cell[0] >= 0) & (cell[1] >= 0) & (np.abs(z[0] - z[1]) < max_dz)
             if good.sum() * step_m < min_km * 1000:
                 continue
-            d = (X[np.where(good, cell[0], 0)].toarray().astype(np.int8) - X[np.where(good, cell[1], 0)].toarray().astype(np.int8))
-            d[~good] = 0
+            # pairs on sloping ground are skipped, not counted as breaks: on a hilly border they cut every run short
+            d = X[cell[0][good]].toarray().astype(np.int8) - X[cell[1][good]].toarray().astype(np.int8)
             out |= {names[j] for j in np.flatnonzero(longest_runs(d) * step_m >= min_km * 1000)}
     return out
 

@@ -65,6 +65,13 @@ sources:
         doi: 10.15468/dl.u2kux5        # Iran plus a margin; all taxa (sealed records filtered out by the confirmation mask)
         url: https://api.gbif.org/v1/occurrence/download/request/0001335-261110092616502.zip
         records: 1646532
+bordercheck:
+  accept:
+    - {lat: 31.38, lon: 67.73, layer: ecoregions, reason: "slope break of the Toba Kakar: juniper woodland on slopes of 4 degrees or more above 2,000 m, steppe on the gentler Toba plateau (median slope 3 against 6 degrees); the two juniper rules share these thresholds on both sides of the line, and the edge lies mostly inside Afghanistan, not on it"}
+    - {lat: 29.85, lon: 66.25, layer: ecoregions, reason: "foot of the Sarlath hills south of Chaman, along which the Durand Line was drawn: the Shorawak plain on the Afghan side (median 1,140 m) against hills on the Pakistani side (1,560 m)"}
+    - {lat: 30.16, lon: 66.29, layer: ecoregions, reason: "foot of the Khwaja Amran and Sarlath hills at Chaman, along which the Durand Line was drawn: plain on the Afghan side (median 1,190 m) against hills on the Pakistani side (1,640 m)"}
+    - {lat: 29.94, lon: 66.28, layer: faunal_regions, reason: "foot of the Sarlath hills south of Chaman, along which the Durand Line was drawn: plain on the Afghan side (median 1,140 m) against hills on the Pakistani side (1,560 m); at matched heights only 2 species differ"}
+    - {lat: 30.90, lon: 66.33, layer: faunal_regions, reason: "foot of the Khwaja Amran range north of Chaman, along which the Durand Line was drawn: plain on the Afghan side (median 1,210 m) against the range on the Pakistani side (1,860 m)"}
 provinces:
   units:
     - code: "01"
@@ -288,8 +295,8 @@ qa_zooms:   # close-up QA figures (lon/lat boxes W, S, E, N)
 communities:
   rules: communities_pak-afg-irn.yaml
 assemble:
-  faunal_k: 98                 # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 274 border-clipped range maps left out): 6 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (25, 14, 12, 16, 19, 12)
-  faunal_group_k: 6            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
+  faunal_k: 125                # joint Faunal Ecoregions with Pakistan, Afghanistan & Iran, Central Asia and the Caucasus (joint_faunal, 25 km bins, 337 border-clipped range maps left out): 7 groups (largest step above 5 regions), then regions within each group where its own turnover curve levels off (17, 9, 17, 17, 30, 19, 16)
+  faunal_group_k: 7            # the key groups them (nests exactly; the largest step above 5 regions in the joint turnover curve)
 confirmation:   # docs/preregistration.md: Iran's records in these squares and their buffer are sealed until the map is frozen
   area: IRN
   mask: docs/confirmation/iran_mask.json
@@ -301,6 +308,6 @@ confirmation:   # docs/preregistration.md: Iran's records in these squares and t
   open: true             # opened 2026-11-13 after the freeze commit 6c3d523 (hash in docs/ledger.md)
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351   # SHA-256 of outputs/pak-afg-irn/ecoregions.gpkg at the freeze (v0.5.0)
 faunal:
-  k_maps: [6, 98]             # 98 regions grouped into 6, shared by the three areas (assemble.faunal_k / faunal_group_k)
+  k_maps: [7, 125]            # 125 regions grouped into 7, shared by the three areas (assemble.faunal_k / faunal_group_k)
 plots:   # docs/preregistration.md: the frozen v0.5.0 map, hashed before Iran's sPlotOpen plots are opened
   map_sha256: a8c404051828a80cf3f0670604227b191cc0585ece5da56005bd69700d9e8351
