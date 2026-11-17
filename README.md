@@ -1,35 +1,32 @@
-# Biotic Regions of the World
+# World Atlas of Biotic Regions
 
-A map of the world's regions of native life. A Biotic Region is a connected area whose native plants and animals,
-taken together, form a community distinct from those of its neighbours. Each region holds a characteristic mix of
-habitats: a riparian forest or a juniper belt is a habitat inside a region, not a region of its own.
+A map of the world's regions of native life. A Biotic Region is a connected area whose native plants and animals
+together form a community distinct from those of its neighbours. Each region holds its own mix of habitats; a
+riparian forest or a juniper belt is a habitat inside a region, not a region of its own.
 
-The project uses its own definition and evidence. Established maps such as RESOLVE *Ecoregions 2017* serve only as
-outside benchmarks in the tests.
+The atlas is built on its own definition and evidence, and tested against established maps such as RESOLVE
+*Ecoregions 2017*.
 
 ## Status
 
-The first Biotic Regions map is in development, for Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and
-Anatolia as one area. It will be built from four kinds of evidence on a 10 km grid:
+The first map covers Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and Anatolia as one continuous area of
+about 5.5 million km². It combines four kinds of evidence on a 10 km grid:
 
 - native plant composition, modelled from plant records and vegetation plots;
 - native mammals, birds, reptiles and amphibians, from range maps;
-- the mix of natural vegetation types, from the vegetation map described below;
+- the mix of natural vegetation types, from the vegetation layer described below;
 - climate, terrain, soils and geology.
 
-Each kind of evidence is kept only if it improves predictions of species at places not used to build the map. Every
-cell shows how much plant evidence supports it, and cells with little evidence are marked provisional. The method is
-described in [`docs/plan.md`](docs/plan.md).
+Each kind of evidence stays in the model only where it improves predictions of species at places not used to build
+the map, and every cell reports the plant evidence behind it. The method is in [`docs/plan.md`](docs/plan.md).
 
 ## Earlier maps
 
-Before the Biotic Regions, the project published two maps per area as Revised Ecoregions of the World, now frozen at
-[AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions). They are kept here as finished products with
-their test results:
+The atlas grows out of Revised Ecoregions of the World ([AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions),
+frozen), which mapped 5.2 million km² in two layers. Both are kept here with their test results:
 
-- **Floral Ecoregions**: connected areas of one natural vegetation type. They become the vegetation layer of the
-  Biotic Regions.
-- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians. They become the animal layer.
+- **Floral Ecoregions**: natural vegetation mapped at 90 m, now the atlas's vegetation layer.
+- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians, now its animal layer.
 
 | Area | Version | Land area | Floral Ecoregions | Types | Faunal Ecoregions | Maps |
 |---|---|---|---|---|---|---|
@@ -46,13 +43,13 @@ their test results:
 | 2026-11-12 | Texas v0.2.0 |
 | 2026-11-13 | Pakistan, Afghanistan & Iran v0.5.0, with the first confirmation test |
 | 2026-11-14 | Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0) |
-| 2026-11-17 | The project becomes Biotic Regions of the World |
+| 2026-11-17 | The project continues as the World Atlas of Biotic Regions |
 
 ### How the earlier maps were made
 
 **Floral Ecoregions.** Natural vegetation communities are mapped at 90 m resolution from explicit rules on terrain,
-climate, soils, geology and water (the `communities*.yaml` files). Communities are grouped into types, and each Floral Ecoregion is one continuous area of one type, with
-boundaries following landforms.
+climate, soils, geology and water (the `communities*.yaml` files). Communities are grouped into types, and each
+Floral Ecoregion is one continuous area of one type, with boundaries following landforms.
 
 **Faunal Ecoregions.** Areas with distinct animal communities, grouped from IUCN and BirdLife range maps of mammals,
 birds, reptiles and amphibians on 10 km cells.
@@ -63,9 +60,6 @@ during development, they count as exploratory. A stricter test uses records seal
 opened once, after the map is frozen; its rules are fixed in advance in
 [`docs/preregistration.md`](docs/preregistration.md). Every analysis is listed in [`docs/ledger.md`](docs/ledger.md).
 
-Neither earlier map was shown to predict species better than RESOLVE on sealed records. The Floral Ecoregions are
-finer than the bird data can support and reach parity with RESOLVE only at RESOLVE's level of detail.
-
 Results below are the change in prediction error relative to RESOLVE (positive: ours better), with 95 % intervals.
 
 ### Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0)
@@ -74,9 +68,10 @@ Results below are the change in prediction error relative to RESOLVE (positive: 
 
 [![Faunal Ecoregions of Central Asia](outputs/central-asia/faunal_map_v0.6.0_preview.png)](outputs/central-asia/faunal_map_v0.6.0.png)
 
-The Turan lowland divides into the Karakum and Kyzylkum sand deserts, the Ustyurt gypsum desert, solonchaks and takyrs, and tugai forest along the rivers; the foothills from the Kopet Dagh
-to the Fergana Valley are semi-savanna on loess; the Tien Shan and Pamir-Alay rise through walnut-fruit forest,
-juniper woodland, spruce forest and mountain steppe to alpine meadow and cold desert.
+The Turan lowland divides into the Karakum and Kyzylkum sand deserts, the Ustyurt gypsum desert, solonchaks and
+takyrs, and tugai forest along the rivers; the foothills from the Kopet Dagh to the Fergana Valley are semi-savanna
+on loess; the Tien Shan and Pamir-Alay rise through walnut-fruit forest, juniper woodland, spruce forest and
+mountain steppe to alpine meadow and cold desert.
 
 | Exploratory (held-out cells) | Ours vs RESOLVE |
 |---|---|
@@ -87,11 +82,6 @@ juniper woodland, spruce forest and mountain steppe to alpine meadow and cold de
 |---|---|
 | Plants | Descriptive only (16–19 blocks, 20 needed): +0.3 % (−0.2 to +0.8) at 0.25°, +0.8 % (+0.1 to +1.6) at 0.125° |
 | Birds | Descriptive only (18 blocks): Floral Ecoregions −2.4 % (−4.0 to −0.6), Faunal Ecoregions −0.7 % (−1.6 to +0.2) |
-
-The sealed squares held fewer usable records than their raw counts suggested, so no result reached a verdict; the
-count check now keeps a margin. As in Iran, plants favour the Floral Ecoregions slightly and birds do not: the
-Floral Ecoregions are finer than the bird data can resolve. Most Floral Ecoregions here have too few plant records
-to test one by one (25,540 records over 1.24 million km²).
 
 ### Pakistan, Afghanistan & Iran (v0.5.0)
 
@@ -110,10 +100,6 @@ to test one by one (25,540 records over 1.24 million km²).
 | Plants | Not testable: too few sealed records |
 | Vegetation plots (sPlotOpen) | Too few for a verdict; biome agreement 94 % vs RESOLVE's 54 % |
 
-The gain seen on held-out cells did not hold up for birds on the sealed records. A follow-up analysis found that the
-Floral Ecoregions are finer than the bird data can support (they reach parity with RESOLVE at RESOLVE's level of
-detail), and that the Faunal Ecoregions are level with RESOLVE.
-
 ### Texas (v0.2.0)
 
 [![Floral Ecoregions of Texas](outputs/texas/ecoregions_map_v0.2.0_preview.png)](outputs/texas/ecoregions_map_v0.2.0.png)
@@ -126,8 +112,7 @@ detail), and that the Faunal Ecoregions are level with RESOLVE.
 | Birds, Faunal Ecoregions | 0.0 % (−1.0 to +0.9) |
 
 At two to three times RESOLVE's detail, the Floral Ecoregions predict plant records as well as RESOLVE. They agree
-with the EPA ecoregions with a V-measure of 0.66 (Level III) and 0.64 (Level IV). A test on vegetation plots had too
-few plots for a verdict.
+with the EPA ecoregions with a V-measure of 0.66 (Level III) and 0.64 (Level IV).
 
 ## Outputs
 

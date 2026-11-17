@@ -1,6 +1,6 @@
-# Biotic Regions: method plan
+# World Atlas of Biotic Regions: method plan
 
-This plan is fixed before the first Biotic Regions map is built. Changes to it are recorded in
+This plan is fixed before the first map of the atlas is built. Changes to it are recorded in
 [`ledger.md`](ledger.md), and the test rules are registered in [`preregistration.md`](preregistration.md) before any
 result is seen.
 
