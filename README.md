@@ -15,119 +15,18 @@ continuous area of about 5.5 million km². It combines four kinds of evidence on
 
 - native plant composition, modelled from plant records and vegetation plots;
 - native mammals, birds, reptiles and amphibians, from range maps;
-- the mix of natural vegetation types, from the vegetation layer described below;
+- the mix of natural vegetation types, from the vegetation layer;
 - climate, terrain, soils and geology.
 
 Each kind of evidence stays in the model only if it improves predictions of species at places not used to build the
 map, and every cell reports the plant evidence behind it. The method is in [`docs/plan.md`](docs/plan.md).
 
-## Earlier maps
+## Foundations
 
-The atlas grows out of Revised Ecoregions of the World ([AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions),
-frozen), which mapped 5.2 million km² in two layers. Both layers are kept here with their test results:
-
-- **Floral Ecoregions**: natural vegetation mapped at 90 m, the basis of the atlas's vegetation layer.
-- **Faunal Ecoregions**: regions of distinct mammals, birds, reptiles and amphibians on 10 km cells, built from the
-  range maps the atlas's animal layer uses.
-
-| Area | Version | Land area | Floral Ecoregions | Types | Faunal Ecoregions | Maps |
-|---|---|---|---|---|---|---|
-| Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan | 0.6.0 | 1,240,537 km² | 109 | 17 | 19 | [floral](outputs/central-asia/ecoregions_map_v0.6.0.png) · [faunal](outputs/central-asia/faunal_map_v0.6.0.png) |
-| Pakistan, Afghanistan & Iran | 0.5.0 | 3,281,449 km² | 165 | 44 | 20 | [floral](outputs/pak-afg-irn/ecoregions_map_v0.5.0.png) · [faunal](outputs/pak-afg-irn/faunal_map_v0.5.0.png) |
-| Texas | 0.2.0 | 685,641 km² | 31 | 19 | 12 | [floral](outputs/texas/ecoregions_map_v0.2.0.png) · [faunal](outputs/texas/faunal_map_v0.2.0.png) |
-
-| Date | Done |
-|---|---|
-| 2026-11-06 | Pakistan (v0.2.0) |
-| 2026-11-08 | Kashmir (v0.3.0) |
-| 2026-11-09 | Afghanistan (v0.4.0) |
-| 2026-11-11 | Pakistan & Afghanistan v0.4.2; Texas v0.1.0 |
-| 2026-11-12 | Texas v0.2.0 |
-| 2026-11-13 | Pakistan, Afghanistan & Iran v0.5.0, with the first confirmation test |
-| 2026-11-14 | Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0) |
-| 2026-11-17 | The project continues as the World Atlas of Biotic Regions |
-
-### How the earlier maps were made
-
-**Floral Ecoregions.** Natural vegetation communities are mapped at 90 m resolution from explicit rules on terrain,
-climate, soils, geology and water (the `communities*.yaml` files). Communities are grouped into types, and each
-Floral Ecoregion is one continuous area of one type, with boundaries following landforms.
-
-**Faunal Ecoregions.** Areas with distinct animal communities, grouped from IUCN and BirdLife range maps of mammals,
-birds, reptiles and amphibians on 10 km cells.
-
-**Testing.** The maps were compared with RESOLVE on how well they predict the species recorded in GBIF at places not
-used to build them. Half the sample cells are held out for this. Because those held-out results were looked at
-during development, they count as exploratory. A stricter test uses records sealed before work on an area begins and
-opened once, after the map is frozen; its rules are fixed in advance in
-[`docs/preregistration.md`](docs/preregistration.md). Every analysis is listed in [`docs/ledger.md`](docs/ledger.md).
-
-Results below are the change in prediction error relative to RESOLVE (positive: ours better), with 95 % intervals.
-
-### Turkmenistan, Uzbekistan, Tajikistan & Kyrgyzstan (v0.6.0)
-
-[![Floral Ecoregions of Central Asia](outputs/central-asia/ecoregions_map_v0.6.0_preview.png)](outputs/central-asia/ecoregions_map_v0.6.0.png)
-
-[![Faunal Ecoregions of Central Asia](outputs/central-asia/faunal_map_v0.6.0_preview.png)](outputs/central-asia/faunal_map_v0.6.0.png)
-
-The Turan lowland divides into the Karakum and Kyzylkum sand deserts, the Ustyurt gypsum desert, solonchaks and
-takyrs, and tugai forest along the rivers; the foothills from the Kopet Dagh to the Fergana Valley are semi-savanna
-on loess; the Tien Shan and Pamir-Alay rise through walnut-fruit forest, juniper woodland, spruce forest and
-mountain steppe to alpine meadow and cold desert.
-
-| Exploratory (held-out cells) | Ours vs RESOLVE |
-|---|---|
-| Plants, Floral Ecoregions (0.25° / 0.125° cells) | +0.5 % (−0.1 to +1.0) / +0.9 % (+0.3 to +1.5) |
-| Birds, Faunal Ecoregions | −1.0 % (−2.1 to −0.1) |
-
-| Confirmation (sealed records, opened once) | Result |
-|---|---|
-| Plants | Descriptive only (16–19 blocks, 20 needed): +0.3 % (−0.2 to +0.8) at 0.25°, +0.8 % (+0.1 to +1.6) at 0.125° |
-| Birds | Descriptive only (18 blocks): Floral Ecoregions −2.4 % (−4.0 to −0.6), Faunal Ecoregions −0.7 % (−1.6 to +0.2) |
-
-### Pakistan, Afghanistan & Iran (v0.5.0)
-
-[![Floral Ecoregions of Pakistan, Afghanistan & Iran](outputs/pak-afg-irn/ecoregions_map_v0.5.0_preview.png)](outputs/pak-afg-irn/ecoregions_map_v0.5.0.png)
-
-[![Faunal Ecoregions of Pakistan, Afghanistan & Iran](outputs/pak-afg-irn/faunal_map_v0.5.0_preview.png)](outputs/pak-afg-irn/faunal_map_v0.5.0.png)
-
-| Exploratory (held-out cells) | Ours vs RESOLVE |
-|---|---|
-| Plants, Floral Ecoregions (0.25° / 0.125° cells) | +0.2 % (−0.3 to +0.6) / +1.2 % (+0.4 to +1.9) |
-| Birds, Faunal Ecoregions | +1.3 % (+0.4 to +2.3) |
-
-| Confirmation (sealed Iranian records, opened once) | Result |
-|---|---|
-| Birds | Not demonstrated: Floral Ecoregions −2.9 % (−4.6 to −1.6), Faunal Ecoregions −0.9 % (−3.4 to +1.0) |
-| Plants | Not testable: too few sealed records |
-| Vegetation plots (sPlotOpen) | Too few for a verdict; biome agreement 94 % vs RESOLVE's 54 % |
-
-### Texas (v0.2.0)
-
-[![Floral Ecoregions of Texas](outputs/texas/ecoregions_map_v0.2.0_preview.png)](outputs/texas/ecoregions_map_v0.2.0.png)
-
-[![Faunal Ecoregions of Texas](outputs/texas/faunal_map_v0.2.0_preview.png)](outputs/texas/faunal_map_v0.2.0.png)
-
-| Exploratory (held-out cells) | Ours vs RESOLVE |
-|---|---|
-| Plants, Floral Ecoregions (0.25° / 0.125° cells) | −0.4 % (−0.8 to 0.0) / 0.0 % (−0.5 to +0.5) |
-| Birds, Faunal Ecoregions | 0.0 % (−1.0 to +0.9) |
-
-At two to three times RESOLVE's detail, the Floral Ecoregions predict plant records as well as RESOLVE. They agree
-with the EPA ecoregions with a V-measure of 0.66 (Level III) and 0.64 (Level IV).
-
-## Outputs
-
-Each area's files are in `outputs/<area>/` (larger GeoPackages are zipped). The older Pakistan & Afghanistan v0.4.2
-files are in `outputs/`.
-
-| File | Contents |
-|---|---|
-| `ecoregions.gpkg` | Floral Ecoregions, their types, Faunal Ecoregions, biomes, borders, rivers (Albers equal-area) |
-| `ecoregions.csv` | attributes of each Floral Ecoregion: type, biome, Faunal Ecoregion, area, elevation, climate, population, land converted, countries |
-| `ecoregions_map_v*.png`, `faunal_map_v*.png` | maps of the Floral and Faunal Ecoregions |
-| `physiographic.gpkg`, `physiographic_map_v*.png` | the landform units the Floral Ecoregion boundaries follow |
-| `scorecard*.csv`, `confirmation*.csv`, `validation_*.csv`, `ecoregion_audit.csv` | test results and the per-ecoregion audit |
+The atlas builds on Revised Ecoregions of the World, the project's earlier maps of natural vegetation and vertebrate
+regions, archived with their maps and test results at
+[AsasHusain/Ecoregions](https://github.com/AsasHusain/Ecoregions). Its vegetation rules, landform units and
+range-map analysis carry forward as the atlas's layers; their working files are in `outputs/<area>/`.
 
 ## How to run
 
@@ -153,11 +52,11 @@ On Windows without `make`: `bash scripts/build_all.sh` from Git Bash. Raw downlo
 | USGS State Geologic Map Compilation | geology (Texas) | Horton 2017, doi:10.5066/F7WH2N65 | public domain |
 | ESA WorldCover 2021 | land converted | Zanaga et al. 2022, doi:10.5281/zenodo.7254221 | CC BY 4.0 |
 | GHS-POP R2023A (2020) | population | Schiavina et al. 2023, JRC | CC BY 4.0 |
-| IUCN Red List range maps and assessments | Faunal Ecoregions | IUCN 2026, *The IUCN Red List of Threatened Species* | IUCN terms (non-commercial) |
-| BirdLife bird distribution maps 2025 | Faunal Ecoregions | BirdLife International and Handbook of the Birds of the World 2025 | BirdLife terms (non-commercial) |
+| IUCN Red List range maps and assessments | animal layer | IUCN 2026, *The IUCN Red List of Threatened Species* | IUCN terms (non-commercial) |
+| BirdLife bird distribution maps 2025 | animal layer | BirdLife International and Handbook of the Birds of the World 2025 | BirdLife terms (non-commercial) |
 | EltonTraits 1.0 | body mass for the megafauna lists | Wilman et al. 2014, *Ecology* 95: 2027, doi:10.6084/m9.figshare.3559887 | CC0 |
 | GBIF occurrence downloads | testing, audit | GBIF.org 2026, doi:10.15468/dl.22b9a4, doi:10.15468/dl.6t43nn, doi:10.15468/dl.gv4z7m, doi:10.15468/dl.u2kux5, doi:10.15468/dl.77g6hc | per record; only aggregates stored |
-| RESOLVE Ecoregions 2017 | biome labels of the earlier maps; comparison | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
+| RESOLVE Ecoregions 2017 | comparison; biome labels of the vegetation layer | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
 | EPA Level III and IV ecoregions | comparison only (Texas) | Griffith et al. 2007, *Ecoregions of Texas*, U.S. EPA | public domain |
 | Jung et al. 2020 habitat map; Hengl et al. 2018 potential natural vegetation | checks of the vegetation rules | Jung et al. 2020, *Sci. Data* 7: 220; Hengl et al. 2018, *PeerJ* 6: e5457 | CC BY 4.0 |
 | WhiteboxTools | geomorphons | Lindsay 2016, *Comput. Geosci.* 95: 75–84 | MIT |
