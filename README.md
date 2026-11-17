@@ -1,5 +1,26 @@
 # Revised Ecoregions of the World
 
+> **Frozen on 17 November 2026.** The work continues as **Biotic Regions of the World** at
+> [AsasHusain/Bioregions](https://github.com/AsasHusain/Bioregions).
+>
+> **Why the project changed.** The aim was a map of regions with distinct native life. Testing showed that the maps
+> here fall short of it:
+>
+> - A Floral Ecoregion is a connected area of one vegetation type. It maps a habitat, not a region with its own
+>   community of plants and animals.
+> - Neither map predicted species at sealed test sites better than RESOLVE. In Iran, for birds, the Floral
+>   Ecoregions did 2.9 % worse and the Faunal Ecoregions 0.9 % worse. The Floral Ecoregions matched RESOLVE only
+>   when coarsened to its level of detail.
+> - Each area was built on its own and joined to its neighbours at national borders, so the type could change at a
+>   border where two areas meet.
+>
+> The new project maps one set of Biotic Regions: connected areas whose native plants and animals, taken together,
+> form a community distinct from those of their neighbours, each holding a mix of habitats. It uses its own
+> definition, with RESOLVE only as an outside benchmark. The vegetation and animal maps developed here become its
+> supporting layers.
+>
+> The maps, results and code below are unchanged.
+
 A new ecoregion map of the world, built to improve on the WWF/RESOLVE *Ecoregions 2017* map. Each area is mapped
 with the same method and published when it is finished. Every area has two maps:
 

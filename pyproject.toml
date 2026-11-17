@@ -7,7 +7,7 @@ name = "ecoregions"
 version = "0.1.0"
 description = "Revised Ecoregions of the World: fine-grained ecoregions built area by area"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = {text = "PolyForm-Noncommercial-1.0.0"}
 
 [project.scripts]
 ecoregions = "ecoregions.cli:main"
