@@ -30,7 +30,6 @@ from pyproj import Transformer
 from rasterio.features import shapes
 from scipy import ndimage as ndi
 
-from . import vectors
 from .config import Paths
 from .covariates import WORLDCOVER, litho_groups
 from .features import dune_mask
@@ -326,16 +325,6 @@ def run(cfg) -> None:
     wc = zonal_shares(lab, read(paths.raster("worldcover")), n, WORLDCOVER.keys())
     for k in WORLDCOVER:
         df[f"wc_{k}"] = wc[k].values[df.unit]
-
-    # L1 parent (majority RESOLVE ecoregion) and how nested the unit is
-    res = read(paths.raster("resolve"))
-    r_ids = np.unique(res[(lab > 0) & (res > 0)])
-    rs = zonal_shares(lab, res, n, r_ids)
-    df["l1_eco_id"] = r_ids[rs.values[df.unit].argmax(1)]
-    df["l1_share"] = rs.values[df.unit].max(1)
-    del res
-    rv = vectors.resolve(cfg).drop_duplicates("ECO_ID").set_index("ECO_ID")
-    df["l1_name"] = df.l1_eco_id.map(rv.ECO_NAME)
 
     # confidence components
     B = read(paths.raster("boundary_strength"))

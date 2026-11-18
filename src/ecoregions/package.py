@@ -29,7 +29,7 @@ HAND_LABELS = {"active_floodplain": "active floodplain", "meander_floodplain": "
 
 L3_COLUMNS = [
     "code", "name", "name_basis", "review_flag", "also_contains", "l2_code", "l2_name", "l2_family",
-    "l1_eco_id", "l1_name", "l1_share", "area_km2",
+    "area_km2",
     "elev_min", "elev_p10", "elev_median", "elev_mean", "elev_p90", "elev_max", "slope_mean", "slope_median",
     "relief5k_mean", "landform_hammond", "plains_share", "dune_share",
     "litho_dominant", "litho_share", "geo_unit_dominant", "geo_age_rank",

@@ -25,7 +25,7 @@ from .grid import Grid, read
 log = logging.getLogger(__name__)
 
 MAPLIBRE = "5.6.0"
-POPUP_FIELDS = ["code", "name", "l2_name", "l1_name", "area_km2", "elev_p10", "elev_median", "elev_p90", "slope_mean",
+POPUP_FIELDS = ["code", "name", "l2_name", "area_km2", "elev_p10", "elev_median", "elev_p90", "slope_mean",
                 "landform_hammond", "litho_dominant", "geo_unit_dominant", "soil_summary", "climate_summary",
                 "hand_mix", "plains_share", "gbif_records", "gbif_species", "gbif_records_per_100km2", "gbif_sampling",
                 "confidence", "name_basis", "review_flag", "also_contains", "description"]
@@ -308,7 +308,6 @@ map.on('load', () => {
       row('Soil', p.soil_summary) + row('Climate', p.climate_summary) +
       row('Height above drainage', p.hand_mix) +
       row('GBIF', `${fmt(p.gbif_records)} records, ${fmt(p.gbif_species)} species (${fmt(p.gbif_records_per_100km2, 1)} per 100 km²) — ${p.gbif_sampling}`) +
-      row('L1 parent (RESOLVE)', p.l1_name) +
       row('Confidence', fmt(p.confidence, 2)) +
       (p.also_contains ? row('Also contains', p.also_contains) : '');
   });
