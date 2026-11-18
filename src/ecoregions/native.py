@@ -42,32 +42,37 @@ def status_table(paths: Paths) -> tuple[pd.DataFrame, pd.DataFrame]:
     names_f, dist_f = root / "names_resolved.csv.gz", root / "status_by_area.csv.gz"
     if names_f.exists() and dist_f.exists():
         return pd.read_csv(names_f), pd.read_csv(dist_f)
-    n = pd.read_csv(root / "wcvp_names.csv", sep="|", dtype=str, quoting=3,
-                    usecols=["plant_name_id", "taxon_rank", "taxon_status", "genus", "species",
-                             "accepted_plant_name_id", "parent_plant_name_id"])
-    n = n[n.species.notna() & (n.species != "")]
-    n["name"] = _binomial(n.genus, n.species)
-    acc = n[n.taxon_status == "Accepted"].set_index("plant_name_id")
-    # accepted species of every accepted taxon: itself, or for an infraspecific taxon the species it belongs to
-    acc_sp = acc["name"]
-    # every name (accepted or not) -> its accepted taxon -> that taxon's species
-    target = n.accepted_plant_name_id.where(n.taxon_status != "Accepted", n.plant_name_id)
-    n["accepted"] = target.map(acc_sp)
-    n = n.dropna(subset=["accepted"])
-    # an accepted name resolves to itself even if it is also a synonym elsewhere (homonyms)
-    own = n[n.taxon_status == "Accepted"][["name", "accepted"]].drop_duplicates()
-    other = n[(n.taxon_status != "Accepted") & ~n.name.isin(own.name)][["name", "accepted"]].drop_duplicates()
-    names = pd.concat([own, other])
+    cols = ["plant_name_id", "taxon_status", "genus", "species", "accepted_plant_name_id"]
+    read = lambda f, usecols: pd.read_csv(root / f, sep="|", dtype=str, quoting=3, usecols=usecols,  # noqa: E731
+                                          chunksize=200_000)  # in chunks: the build may be running alongside
+
+    def named(c):
+        c = c[c.species.notna() & (c.species != "")]
+        return c.assign(name=_binomial(c.genus, c.species))
+
+    # pass 1: the species of every accepted taxon (an infraspecific taxon belongs to its species)
+    acc_sp = pd.concat([named(c).loc[lambda c: c.taxon_status == "Accepted"].set_index("plant_name_id")["name"]
+                        for c in read("wcvp_names.csv", cols)])
+    # pass 2: every name -> its accepted taxon -> that taxon's species; an accepted name resolves to itself
+    own, other = [], []
+    for c in read("wcvp_names.csv", cols):
+        c = named(c)
+        is_acc = c.taxon_status == "Accepted"
+        c = c.assign(accepted=c.accepted_plant_name_id.where(~is_acc, c.plant_name_id).map(acc_sp)).dropna(subset=["accepted"])
+        own.append(c.loc[c.taxon_status == "Accepted", ["name", "accepted"]].drop_duplicates())
+        other.append(c.loc[c.taxon_status != "Accepted", ["name", "accepted"]].drop_duplicates())
+    own = pd.concat(own).drop_duplicates()
+    other = pd.concat(other).drop_duplicates()
+    names = pd.concat([own, other[~other.name.isin(own.name)]])
     k = names.groupby("name").accepted.nunique()
     names = names[names.name.isin(k[k == 1].index)].drop_duplicates("name")  # ambiguous names stay unmatched
 
-    d = pd.read_csv(root / "wcvp_distribution.csv", sep="|", dtype=str, quoting=3,
-                    usecols=["plant_name_id", "area_code_l3", "introduced", "location_doubtful"])
-    d = d[d.location_doubtful != "1"]
-    d["accepted"] = d.plant_name_id.map(acc_sp)
-    d = d.dropna(subset=["accepted"])
-    d["native"] = d.introduced == "0"
-    dist = d.groupby(["accepted", "area_code_l3"]).native.any().reset_index()
+    parts = []
+    for d in read("wcvp_distribution.csv", ["plant_name_id", "area_code_l3", "introduced", "location_doubtful"]):
+        d = d[d.location_doubtful != "1"]
+        d = d.assign(accepted=d.plant_name_id.map(acc_sp), native=d.introduced == "0").dropna(subset=["accepted"])
+        parts.append(d.groupby(["accepted", "area_code_l3"]).native.any())
+    dist = pd.concat(parts).groupby(level=[0, 1]).any().reset_index()
     dist["status"] = np.where(dist.native, "native", "introduced")
     dist = dist[["accepted", "area_code_l3", "status"]]
     names.to_csv(names_f, index=False)
