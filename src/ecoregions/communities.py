@@ -43,7 +43,7 @@ log = logging.getLogger(__name__)
 
 NUMERIC = {"elev": "dem", "slope": "slope", "bio1": "clim_bio1", "bio12": "clim_bio12", "ai": "clim_ai",
            "gdd5": "clim_gdd5", "summer_rain": "clim_summer_rain", "coast_km": None, "river_km": None, "creek_m": None, "northness": None,
-           "tpi": "tpi_450"}
+           "tpi": "tpi_450", "green_rel": None, "bare": None}  # green_rel, bare: 1984-93 Landsat (stage landsat), 270 m
 CATEGORICAL = {"hand": "hand_class", "litho": "geo_litho", "province": None}
 BOOLEAN = {"dune": None}
 
@@ -159,6 +159,18 @@ def run(cfg) -> None:
     l2_of_unit = np.zeros(int(att.unit.max()) + 1, "uint8")
     l2_of_unit[att.unit.to_numpy()] = att.l2_code.astype(int).to_numpy()
 
+    used = {k for c in comms for k in c["where"]}
+    sat = {}
+    if "green_rel" in used:  # greenness above or below the surrounding ~5 km, so the test holds in wet and dry country
+        g = read(paths.coarse("ls_green"))
+        ok = np.isfinite(g)
+        size = max(3, round(5000 / (grid.res * f)) | 1)
+        mean = ndimage.uniform_filter(np.where(ok, g, 0), size) / np.maximum(ndimage.uniform_filter(ok.astype("float32"), size), 1e-6)
+        sat["green_rel"] = (g - mean).astype("float32")
+        del g, ok, mean
+    if "bare" in used:
+        sat["bare"] = read(paths.coarse("ls_bare"))
+
     H, W = grid.shape
     out = np.zeros((H, W), "uint8")
     fallback = np.zeros((H, W), "uint8")
@@ -178,6 +190,8 @@ def run(cfg) -> None:
         rr, cc = np.minimum(r, coast.shape[0] - 1), np.minimum(c, coast.shape[1] - 1)
         tile["coast_km"] = coast[rr][:, cc]
         tile["river_km"] = river[rr][:, cc]
+        for k, a in sat.items():
+            tile[k] = a[rr][:, cc]
         water = (read(paths.raster("worldcover"), rd) == 80) | (read(paths.raster("mask"), rd) == 0)
         tile["creek_m"] = np.minimum(ndimage.distance_transform_edt(~water) * grid.res,
                                      ccfg["creek_max_m"] + grid.res).astype("float32")

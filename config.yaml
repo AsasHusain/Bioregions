@@ -305,6 +305,12 @@ faunal:
 assemble:
   smooth_cells: 7              # majority filter of ecoregion types on the 270 m grid (~1.9 km)
   mmu_km2: 1000                # minimum ecoregion size
+  belts:                       # forest belts kept as zones (assemble.belt_zones), 2026-11-17: Tien Shan spruce and
+    window_km: 2                 # Euxine fir-spruce kept none of their 11,211 and 12,911 km2 of communities
+    min_share: 0.3
+    types: [chir, moist_temperate, sulaiman_temperate, northern_dry_temperate, siwalik, hyrcanian_montane, arasbaran,
+            zagros_oak, walnut_fruit, tienshan_spruce, euxine, euxine_conifer, north_anatolian, balkan,
+            caucasus_broadleaf, med_pine, taurus_conifer, juniper, ca_juniper]
   snap_band_m: 1000            # boundaries snapped to landform edges within this band
 
 # validation of the v0.2 ecoregions (evaluate stage)

@@ -1071,14 +1071,33 @@ communities:
   indicators: [Populus euphratica, Populus pruinosa, Erianthus ravennae, Halimodendron halodendron, Periploca graeca]
   where:
     province: ['23', '24', '25', '26', '27', '29', '37', '40', '43', '44', '45', '46', '48', '51', '52', '53', '54', '73', '74', '75']
-    hand: [active_floodplain, meander_floodplain]
+    hand: [active_floodplain]
     river_km: [null, 5]
     elev: [null, 1500]
     bio12: [null, 600]
   note: >-
     Floodplains of the Amu Darya, Syr Darya, Zeravshan, Murgab, Tejen-Hari Rud, Helmand, Atrek, Aras and Kura. One
     definition on both banks (2026-11-14): the Afghan, Central Asian and Kura rules differed in floodplain width and
-    the Iranian Aras and Atrek had none, so the type changed at the border rivers.
+    the Iranian Aras and Atrek had none, so the type changed at the border rivers. The active floodplain here; the
+    meander floodplain in tugai_meander, where it was greener than its surroundings.
+  priority: 80
+- id: tugai_meander
+  structure: forest_broadleaf
+  ecoregion: tugai
+  name: Tugai riparian forest on the meander floodplain
+  group: Riparian forest (tugai)
+  indicators: [Populus euphratica, Populus pruinosa, Erianthus ravennae, Halimodendron halodendron, Periploca graeca]
+  where:
+    province: ['23', '24', '25', '26', '27', '29', '37', '40', '43', '44', '45', '46', '48', '51', '52', '53', '54', '73', '74', '75']
+    hand: [meander_floodplain]
+    river_km: [null, 5]
+    elev: [null, 1500]
+    bio12: [null, 600]
+    green_rel: [0.0, null]
+  note: >-
+    2026-11-17: the meander floodplain carries tugai where its 1984-93 Landsat greenness is above that of the
+    surrounding 5 km. Taken whole, the meander floodplain added 3,353 km² of dry terraces on the Afghan Amu Darya
+    plains (greenness 0.067 against 0.096 in the tugai kept and 0.082 in the land around it).
   priority: 80
 - id: amu_loess_steppe
   structure: grassland

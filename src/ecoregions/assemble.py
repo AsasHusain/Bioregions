@@ -41,6 +41,38 @@ log = logging.getLogger(__name__)
 WORLDCOVER_CONVERTED = (40, 50)  # cropland, built-up
 
 
+def block_share(arr: np.ndarray, value: int, factor: int, rows: int = 512) -> np.ndarray:
+    """Share of ``value`` within factor x factor blocks, in strips (the 90 m map of a large area is several GB)."""
+    h, w = arr.shape
+    H, W = -(-h // factor), -(-w // factor)
+    out = np.zeros((H, W), "float32")
+    for r0 in range(0, H, rows):
+        sub = arr[r0 * factor:(r0 + rows) * factor] == value
+        hh = -(-sub.shape[0] // factor)
+        pad = np.zeros((hh * factor, W * factor), bool)
+        pad[: sub.shape[0], : sub.shape[1]] = sub
+        out[r0:r0 + hh] = pad.reshape(hh, factor, W, factor).mean(axis=(1, 3))
+    return out
+
+
+def belt_zones(cls: np.ndarray, cls90: np.ndarray, f: int, belt: list, bc: dict, cell_m: float) -> np.ndarray:
+    """Forest belts (a spruce belt on north slopes, broken by ridges and meadows) as zones: where a belt type covers at
+    least ``min_share`` of the land within ``window_km``, the zone takes that type before smoothing, so the belt
+    survives as one area instead of many patches each outvoted by the vegetation around it."""
+    if not belt:
+        return cls
+    size = max(3, round(bc.get("window_km", 2) * 1000 / cell_m) | 1)
+    best = np.zeros(cls.shape, "float32")
+    out = cls.copy()
+    for t in belt:
+        s = ndi.uniform_filter(block_share(cls90, t, f)[: cls.shape[0], : cls.shape[1]], size)
+        take = (s >= bc.get("min_share", 0.3)) & (s > best) & (cls > 0)
+        out[take] = t
+        best[take] = s[take]
+        log.info("assemble: belt %d covers %.0f km² as a zone", t, take.sum() * (cell_m / 1000) ** 2)
+    return out
+
+
 def majority(lab: np.ndarray, n: int, size: int) -> np.ndarray:
     """Majority (mode) filter of labels 1..n in a size x size window; 0 stays 0."""
     best = np.zeros(lab.shape, "float32")
@@ -311,7 +343,9 @@ def run(cfg) -> None:
     # 1-2. ecoregion types, smoothed on the coarse grid
     cls90 = lut[read(paths.raster("communities"))]
     apply_zones(cls90, ac.get("zones", []), tidx, paths)
-    cls = majority(block_mode(cls90, f), len(tkeys), ac["smooth_cells"])
+    cls = belt_zones(block_mode(cls90, f), cls90, f, [tidx[t] for t in ac.get("belts", {}).get("types", []) if t in tidx],
+                     ac.get("belts", {}), grid.res * f)
+    cls = majority(cls, len(tkeys), ac["smooth_cells"])
     km2_c = grid.cell_km2 * f * f
 
     # 3. faunal region of each L3 unit (majority of the 10 km regions over the unit)
