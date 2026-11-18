@@ -56,7 +56,7 @@ On Windows without `make`: `bash scripts/build_all.sh` from Git Bash. Raw downlo
 | BirdLife bird distribution maps 2025 | animal layer | BirdLife International and Handbook of the Birds of the World 2025 | BirdLife terms (non-commercial) |
 | EltonTraits 1.0 | body mass for the megafauna lists | Wilman et al. 2014, *Ecology* 95: 2027, doi:10.6084/m9.figshare.3559887 | CC0 |
 | GBIF occurrence downloads | testing, audit | GBIF.org 2026, doi:10.15468/dl.22b9a4, doi:10.15468/dl.6t43nn, doi:10.15468/dl.gv4z7m, doi:10.15468/dl.u2kux5, doi:10.15468/dl.77g6hc | per record; only aggregates stored |
-| RESOLVE Ecoregions 2017 | comparison; biome labels of the vegetation layer | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
+| RESOLVE Ecoregions 2017 | comparison and crosswalk | Dinerstein et al. 2017, *BioScience* 67: 534–545 | CC BY 4.0 |
 | EPA Level III and IV ecoregions | comparison only (Texas) | Griffith et al. 2007, *Ecoregions of Texas*, U.S. EPA | public domain |
 | Jung et al. 2020 habitat map; Hengl et al. 2018 potential natural vegetation | checks of the vegetation rules | Jung et al. 2020, *Sci. Data* 7: 220; Hengl et al. 2018, *PeerJ* 6: e5457 | CC BY 4.0 |
 | WhiteboxTools | geomorphons | Lindsay 2016, *Comput. Geosci.* 95: 75–84 | MIT |
