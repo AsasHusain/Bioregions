@@ -2,7 +2,8 @@
 
 Imagery from before most modern canal colonies and city growth shows natural surfaces that later disappeared, which
 suits a map of natural communities. For each Landsat tile (WRS-2 path/row) over the study area, up to
-``landsat.scenes`` clear scenes at least two months apart (Collection 2 Level-2, Microsoft Planetary Computer) are read
+``landsat.scenes`` clear scenes from the same season (``landsat.months``, June-September by default; different years
+first) (Collection 2 Level-2, Microsoft Planetary Computer) are read
 at the ``landsat.overview`` level of their cloud-optimised files (8: about 240 m), masked with the QA band (fill,
 cloud, cloud shadow, cirrus), and reduced to a per-pixel median of six bands; one int16 GeoTIFF per tile is kept in
 ``raw/regions/<area>/landsat``. The tiles are then mosaicked onto the 270 m grid as:
@@ -33,8 +34,9 @@ TOKEN = "https://planetarycomputer.microsoft.com/api/sas/v1/token/landsat-c2-l2"
 BANDS = ("blue", "green", "red", "nir08", "swir16", "swir22")
 
 
-def scenes(bbox, years, max_cloud, per_tile) -> dict:
-    """Clearest Landsat 5 scenes per tile, each at least two months from the others."""
+def scenes(bbox, years, max_cloud, per_tile, months=(6, 9)) -> dict:
+    """Clearest Landsat 5 scenes per tile, all from the same season (``months``, inclusive) and from different years
+    where possible: tiles mixing seasons gave each tile its own greenness and brightness, seen as rectangles."""
     body = {"collections": ["landsat-c2-l2"], "bbox": list(bbox), "datetime": f"{years[0]}-01-01/{years[1]}-12-31",
             "query": {"eo:cloud_cover": {"lt": max_cloud}, "platform": {"in": ["landsat-5"]}}, "limit": 1000}
     feats, url = [], STAC
@@ -45,15 +47,30 @@ def scenes(bbox, years, max_cloud, per_tile) -> dict:
         feats += d["features"]
         nxt = [link for link in d.get("links", []) if link.get("rel") == "next"]
         url, body = (nxt[0]["href"], nxt[0].get("body", body)) if nxt else (None, None)
-    by = {}
+    return pick(feats, per_tile, months)
+
+
+def pick(feats: list, per_tile: int, months=(6, 9)) -> dict:
+    """Per tile, the clearest in-season scenes: one per year first, then the next clearest. A tile with fewer than two
+    in-season scenes takes the season widened by a month at each end."""
+    by, wide = {}, {}
     for f in sorted(feats, key=lambda f: f["properties"]["eo:cloud_cover"]):
         p = f["properties"]
-        k = f"{p['landsat:wrs_path']}{p['landsat:wrs_row']}"
-        m = int(p["datetime"][5:7])
-        got = by.setdefault(k, [])
-        if len(got) < per_tile and all(min(abs(m - g), 12 - abs(m - g)) >= 2 for g, _ in got):
-            got.append((m, f))
-    return {k: [f for _, f in v] for k, v in by.items()}
+        k, m = f"{p['landsat:wrs_path']}{p['landsat:wrs_row']}", int(p["datetime"][5:7])
+        if months[0] <= m <= months[1]:
+            by.setdefault(k, []).append(f)
+        if months[0] - 1 <= m <= months[1] + 1:
+            wide.setdefault(k, []).append(f)
+    by.update({k: fs for k, fs in wide.items() if len(by.get(k, [])) < 2})
+    out = {}
+    for k, fs in by.items():
+        years, first = set(), []
+        for f in fs:
+            if f["properties"]["datetime"][:4] not in years:
+                years.add(f["properties"]["datetime"][:4])
+                first.append(f)
+        out[k] = (first + [f for f in fs if f not in first])[:per_tile]
+    return out
 
 
 def tile_median(fs: list, token: str, overview: int, out) -> None:
@@ -118,12 +135,12 @@ def mosaic_index(tiles: list, name: str, grid: Grid) -> np.ndarray:
 
 def run(cfg) -> None:
     paths = Paths(cfg)
-    lc = {"years": [1984, 1993], "max_cloud": 10, "scenes": 3, "overview": 8, **cfg.get("landsat", {})}
+    lc = {"years": [1984, 1993], "max_cloud": 10, "scenes": 5, "months": [6, 9], "overview": 8, **cfg.get("landsat", {})}
     grid = Grid.load(paths.grid_json).coarsen(cfg["grid"]["coarse_factor"])
     bbox = transform_bounds(grid.rio_crs, "EPSG:4326", *grid.bounds)
     raw = paths.raw_region / "landsat"
     raw.mkdir(parents=True, exist_ok=True)
-    by = scenes(bbox, lc["years"], lc["max_cloud"], lc["scenes"])
+    by = scenes(bbox, lc["years"], lc["max_cloud"], lc["scenes"], lc["months"])
     from shapely.geometry import shape
 
     from .boundaries import load_boundaries, mapped_area

@@ -43,7 +43,7 @@ log = logging.getLogger(__name__)
 
 NUMERIC = {"elev": "dem", "slope": "slope", "bio1": "clim_bio1", "bio12": "clim_bio12", "ai": "clim_ai",
            "gdd5": "clim_gdd5", "summer_rain": "clim_summer_rain", "coast_km": None, "river_km": None, "creek_m": None, "northness": None,
-           "tpi": "tpi_450", "green_rel": None, "bare": None}  # green_rel, bare: 1984-93 Landsat (stage landsat), 270 m
+           "tpi": "tpi_450", "green_rel": None, "bare": None}  # green_rel, bare: 1984-93 Landsat, converted ground reconstructed (features nat_green, nat_bare), 270 m
 CATEGORICAL = {"hand": "hand_class", "litho": "geo_litho", "province": None}
 BOOLEAN = {"dune": None}
 
@@ -162,14 +162,14 @@ def run(cfg) -> None:
     used = {k for c in comms for k in c["where"]}
     sat = {}
     if "green_rel" in used:  # greenness above or below the surrounding ~5 km, so the test holds in wet and dry country
-        g = read(paths.coarse("ls_green"))
+        g = read(paths.coarse("nat_green"))  # converted ground reconstructed from natural ground (features.natural_fill)
         ok = np.isfinite(g)
         size = max(3, round(5000 / (grid.res * f)) | 1)
         mean = ndimage.uniform_filter(np.where(ok, g, 0), size) / np.maximum(ndimage.uniform_filter(ok.astype("float32"), size), 1e-6)
         sat["green_rel"] = (g - mean).astype("float32")
         del g, ok, mean
     if "bare" in used:
-        sat["bare"] = read(paths.coarse("ls_bare"))
+        sat["bare"] = read(paths.coarse("nat_bare"))
 
     H, W = grid.shape
     out = np.zeros((H, W), "uint8")

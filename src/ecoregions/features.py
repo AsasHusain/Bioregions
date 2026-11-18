@@ -25,6 +25,7 @@ basin          HydroBASINS id (centre sample) — one-hot within a province at c
 litho_<k>      share of lithology group k (geo8ag)
 age            mean geological age rank
 clay/sand/ph/soc  SoilGrids 0-30 cm means
+nat_bare/green    Landsat 1984-93 bare-soil index / NDVI, converted ground filled from natural ground (``natural_fill``)
 bio1/bio4/bio12/bio15/gdd5/ai  CHELSA (bio12 and ai log-transformed)
 =============  ==============================================================
 """
@@ -132,6 +133,17 @@ def build(cfg, only: list[str] | None = None) -> None:
 
     blend_seams(cfg, paths, grid, cg, out, names)
 
+    wanted = [n for n, src in LANDSAT.items() if want(n) and paths.coarse(src).exists()]
+    if wanted:  # one Landsat composite for the whole area, so no sheet seams to blend
+        from rasterio.enums import Resampling
+
+        from .fitcheck import WORLDCOVER_CONVERTED, layer
+        conv = np.isin(layer(paths.raster("worldcover"), cg, Resampling.mode), WORLDCOVER_CONVERTED)
+        for n in wanted:
+            write(out / f"{n}.tif", natural_fill(read(paths.coarse(LANDSAT[n])), conv), cg, nodata=np.nan)
+            names.append(n)
+            log.info("feature %-13s Landsat 1984-93, converted ground filled from natural ground around it", n)
+
     # province grid (another integer aggregation)
     pf = cfg["grid"]["province_factor"]
     pg = cg.coarsen(pf)
@@ -146,6 +158,29 @@ def build(cfg, only: list[str] | None = None) -> None:
     if only is None:
         (paths.interim / "features.json").write_text(json.dumps(dict(features=names, coarse_res=cg.res,
                                                                      province_res=pg.res), indent=1))
+
+
+LANDSAT = {"nat_bare": "ls_bare", "nat_green": "ls_green"}  # feature: Landsat layer (stage landsat)
+
+
+def natural_fill(a: np.ndarray, converted: np.ndarray, sigmas=(2, 8, 32, 128)) -> np.ndarray:
+    """``a`` with converted cells (cropland, built-up) replaced by the mean of the natural ground around them, taken
+    over widening Gaussian windows until every converted cell has natural neighbours: in 1984-93 irrigated land shows
+    crops, not the sand or steppe a restoration would return to, and edges must not follow canal colonies."""
+    from scipy import ndimage as ndi
+
+    ok = np.isfinite(a) & ~converted
+    out = np.where(ok, a, np.nan).astype("float32")
+    todo = converted & np.isfinite(a)
+    for s in sigmas:
+        if not todo.any():
+            break
+        num = ndi.gaussian_filter(np.where(ok, a, 0).astype("float32"), s)
+        den = ndi.gaussian_filter(ok.astype("float32"), s)
+        got = todo & (den > 0.05)
+        out[got] = num[got] / den[got]
+        todo &= ~got
+    return out
 
 
 def blend(a: np.ndarray, seam: np.ndarray, res: float, band_m: float) -> np.ndarray:

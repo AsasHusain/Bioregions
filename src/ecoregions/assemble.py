@@ -58,15 +58,20 @@ def block_share(arr: np.ndarray, value: int, factor: int, rows: int = 512) -> np
 def belt_zones(cls: np.ndarray, cls90: np.ndarray, f: int, belt: list, bc: dict, cell_m: float) -> np.ndarray:
     """Forest belts (a spruce belt on north slopes, broken by ridges and meadows) as zones: where a belt type covers at
     least ``min_share`` of the land within ``window_km``, the zone takes that type before smoothing, so the belt
-    survives as one area instead of many patches each outvoted by the vegetation around it."""
+    survives as one area instead of many patches each outvoted by the vegetation around it. Where belts overlap, the
+    one furthest past its own threshold takes the cell, except that a type marked wins takes every cell where it
+    qualifies (a mountain forest belt holds the scrub and meadow on the slopes between its forests)."""
     if not belt:
         return cls
-    size = max(3, round(bc.get("window_km", 2) * 1000 / cell_m) | 1)
     best = np.zeros(cls.shape, "float32")
     out = cls.copy()
-    for t in belt:
+    by = bc.get("by_type", {})
+    for t in sorted(belt, key=lambda t: bool(by.get(t, {}).get("wins"))):
+        own = {**bc, **by.get(t, {})}  # streaky belts need a wider window to hold together
+        size = max(3, round(own.get("window_km", 2) * 1000 / cell_m) | 1)
         s = ndi.uniform_filter(block_share(cls90, t, f)[: cls.shape[0], : cls.shape[1]], size)
-        take = (s >= bc.get("min_share", 0.3)) & (s > best) & (cls > 0)
+        s /= own.get("min_share", 0.3)  # how far past its own threshold: belts measured in different windows compare
+        take = (s >= 1) & ((s > best) | bool(own.get("wins"))) & (cls > 0)
         out[take] = t
         best[take] = s[take]
         log.info("assemble: belt %d covers %.0f km² as a zone", t, take.sum() * (cell_m / 1000) ** 2)
@@ -343,8 +348,10 @@ def run(cfg) -> None:
     # 1-2. ecoregion types, smoothed on the coarse grid
     cls90 = lut[read(paths.raster("communities"))]
     apply_zones(cls90, ac.get("zones", []), tidx, paths)
-    cls = belt_zones(block_mode(cls90, f), cls90, f, [tidx[t] for t in ac.get("belts", {}).get("types", []) if t in tidx],
-                     ac.get("belts", {}), grid.res * f)
+    bc = dict(ac.get("belts", {}))
+    bc["by_type"] = {tidx[t]: v for t, v in bc.get("by_type", {}).items() if t in tidx}
+    cls = belt_zones(block_mode(cls90, f), cls90, f, [tidx[t] for t in bc.get("types", []) if t in tidx], bc,
+                     grid.res * f)
     cls = majority(cls, len(tkeys), ac["smooth_cells"])
     km2_c = grid.cell_km2 * f * f
 
@@ -410,12 +417,18 @@ def run(cfg) -> None:
     snapped, _ = make_contiguous(snapped, mmu_px)
     snapped = merge_small_units(snapped, {int(u): mmu_px for u in np.unique(snapped[snapped > 0])})
     ns = int(snapped.max()) + 1
-    snapped = join_same_type(snapped, mode_per_label(snapped, cls90, ns, len(tkeys) + 1))
+    # a unit is named by the zone it was drawn from, not its commonest 90 m community: a spruce belt is a forest and
+    # meadow mosaic whose commonest pixel is meadow, and naming it by that pixel would erase the belt again
+    zl = upsample(cls.astype("uint8"), f, grid.shape)
+    snapped = join_same_type(snapped, mode_per_label(snapped, zl, ns, len(tkeys) + 1))
     ids = np.unique(snapped[snapped > 0])
     remap = np.zeros(int(snapped.max()) + 1, np.int32)
     remap[ids] = np.arange(1, ids.size + 1)
     eco = remap[snapped].astype("uint16")
     del snapped
+    zc = pair_counts(eco, zl, int(eco.max()) + 1, len(tkeys) + 1)
+    zc[:, 0] = 0
+    del zl
     write(paths.raster("ecoregions"), eco, grid, nodata=0)
     n = int(eco.max()) + 1
     l3 = read(paths.raster("l3")).astype(np.int32)
@@ -427,8 +440,8 @@ def run(cfg) -> None:
     cells = tcount.sum(axis=1)
     area = cells * km2
     tcount[:, 0] = 0
-    etype = tcount.argmax(axis=1)
-    purity = tcount.max(axis=1) / np.maximum(tcount.sum(axis=1), 1)
+    etype = zc.argmax(axis=1)
+    purity = tcount[np.arange(n), etype] / np.maximum(tcount.sum(axis=1), 1)  # share of the unit's own type's communities
     del cls90
     nf = int(par90.max()) + 1
     fcount = pair_counts(eco, par90, n, nf)
