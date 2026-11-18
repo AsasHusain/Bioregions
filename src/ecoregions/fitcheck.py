@@ -101,7 +101,40 @@ def run(cfg) -> None:
                      cur[0]["precision"], cur[0]["recall"], f"; published {ref[0]['fit']:.2f}" if ref else "")
     df = pd.DataFrame(rows)
     df.to_csv(paths.outputs / "fitcheck.csv", index=False)
+    lost = coverage(cfg, paths, fc)
     worse = df[df.change < -fc["max_drop"]] if "change" in df else df.iloc[0:0]
-    if len(worse):
-        raise SystemExit("fitcheck: drawn worse than the published map: " + "; ".join(
-            f"{r.type} fit {r.fit:.2f} (published {r.published_fit:.2f})" for r in worse.itertuples()))
+    msgs = [f"{r.type} fit {r.fit:.2f} (published {r.published_fit:.2f})" for r in worse.itertuples()]
+    msgs += [f"{r.type}: {r.mapped_km2:,.0f} km² mapped of {r.pixel_km2:,.0f} km² of its communities" for r in lost.itertuples()]
+    if msgs:
+        raise SystemExit("fitcheck: " + "; ".join(msgs))
+
+
+def coverage(cfg, paths: Paths, fc: dict) -> pd.DataFrame:
+    """Types whose communities cover at least ``min_type_km2`` of 90 m pixels but which keep less than
+    ``min_kept`` of that area as mapped units: narrow belts (a north-slope forest in a meadow unit) outvoted when
+    units take their majority type. Writes ``outputs/<area>/type_coverage.csv``; returns the lost types."""
+    from .communities import load_rules
+
+    rules = load_rules(paths.root / cfg["communities"]["rules"])
+    eco = [c["ecoregion"] for c in rules["communities"]]
+    from .boundaries import load_boundaries, mapped_area
+
+    px = np.zeros(len(eco) + 1, np.int64)
+    with rasterio.open(paths.raster("communities")) as s:
+        own = mapped_area(cfg, paths, *load_boundaries(paths)).to_crs(s.crs).geometry  # a parcel's strip is not its own
+        for _, w in s.block_windows(1):
+            inside = rasterize([(g, 1) for g in own], out_shape=(w.height, w.width), transform=s.window_transform(w),
+                               fill=0).astype(bool)
+            if inside.any():
+                px += np.bincount(s.read(1, window=w)[inside], minlength=px.size)[: px.size]
+        cell_km2 = abs(s.transform.a * s.transform.e) / 1e6
+    pix = pd.Series(px[1:] * cell_km2, index=eco).groupby(level=0).sum()
+    mapped = gpd.read_file(paths.outputs / "ecoregions.gpkg", layer="ecoregions", columns=["type", "area_km2"],
+                           ignore_geometry=True).groupby("type").area_km2.sum()
+    cov = pd.DataFrame({"pixel_km2": pix.round(0), "mapped_km2": mapped.reindex(pix.index).fillna(0).round(0)})
+    cov["kept"] = (cov.mapped_km2 / cov.pixel_km2.clip(lower=1)).round(3)
+    cov.rename_axis("type").reset_index().to_csv(paths.outputs / "type_coverage.csv", index=False)
+    lost = cov[(cov.pixel_km2 >= fc.get("min_type_km2", 500)) & (cov.kept < fc.get("min_kept", 0.1))]
+    for t, r in lost.iterrows():
+        log.warning("fitcheck: %s keeps %.0f of %.0f km² of its communities as mapped units", t, r.mapped_km2, r.pixel_km2)
+    return lost.rename_axis("type").reset_index()
