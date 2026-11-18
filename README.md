@@ -5,18 +5,23 @@ connected area whose native plants and animals together form a community distinc
 Each region holds its own mix of habitats; a riparian forest or a juniper belt is a habitat inside a region, not a
 region of its own.
 
+The atlas maps natural communities everywhere, including land that is now farmed or built on. For any site it gives
+the reference to restore toward: the natural vegetation, the Biotic Region and its native plants and animals.
+
 The atlas uses its own definition and evidence. Each map is tested against established maps, such as RESOLVE
 *Ecoregions 2017*, and against maps built from climate or location alone.
 
 ## Status
 
 The first map, now in development, covers Pakistan, Afghanistan, Iran, Central Asia, the Caucasus and Anatolia as one
-continuous area of about 5.5 million km². It combines four kinds of evidence on a 10 km grid:
+continuous area of about 5.5 million km². It combines six kinds of evidence on a 10 km grid:
 
 - native plant composition, modelled from plant records and vegetation plots;
 - native mammals, birds, reptiles and amphibians, from range maps;
 - the mix of natural vegetation types, from the vegetation layer;
-- climate, terrain, soils and geology.
+- climate, terrain, soils and geology;
+- satellite measures of seasonal greenness, from natural ground;
+- satellite lidar measures of canopy height and cover, as a check on woodland and open vegetation.
 
 Each kind of evidence stays in the model only if it improves predictions of species at places not used to build the
 map, and every cell reports the plant evidence behind it. The method is in [`docs/plan.md`](docs/plan.md).

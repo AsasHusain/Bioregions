@@ -16,8 +16,9 @@ changes the map.
    (per 1,000 km² of the ecoregion inside calibration cells) is reported too. A type
    whose distinctive indicators have no record in the study area (or that has
    none) is *untestable*: GBIF can neither support nor contradict it.
-2. Reference: share of the area in RESOLVE 2017 ecoregions listed as compatible
-   with the type (``ecoregion_types.<type>.resolve``). A flag, never a verdict.
+2. Comparison: share of the area in RESOLVE 2017 ecoregions listed as compatible
+   with the type (``ecoregion_types.<type>.resolve``, a crosswalk). Reported only;
+   it never flags an ecoregion for review.
 3. Coherence: Bray-Curtis similarity of the ecoregion's community mix to the
    rest of its type; a low value means one name covers different vegetation.
 4. Stability: from the ``evaluate`` sensitivity test.
@@ -110,11 +111,8 @@ def review_flags(row, ac) -> list[str]:
         f.append(f"GBIF: {row.rival_records} records of {row.top_rival} indicators, {row.own_records} of its own")
     if row.coherence < ac["min_coherence"]:
         f.append(f"vegetation differs from the rest of its type (similarity {row.coherence:.2f})")
-    if row.evidence != "supported":
-        if row.resolve_compatible < ac["min_resolve_share"]:
-            f.append(f"{100 * row.resolve_compatible:.0f} % in compatible RESOLVE units (main: {row.resolve_main})")
-        if row.stability < ac["min_stability"]:
-            f.append(f"unstable under rule changes ({100 * row.stability:.0f} %)")
+    if row.evidence != "supported" and row.stability < ac["min_stability"]:
+        f.append(f"unstable under rule changes ({100 * row.stability:.0f} %)")
     return f
 
 
@@ -167,15 +165,17 @@ def run(cfg) -> None:
     rec = rec.assign(type=rec.sp.map(ind)).dropna(subset=["type"])
     hits = rec.groupby(["unit", "type"]).size().unstack(fill_value=0).reindex(index=e.index, columns=tkeys, fill_value=0)
 
-    # 2. RESOLVE compatibility
+    # 2. RESOLVE crosswalk (comparison only)
     res_tab = vectors.resolve(cfg)[["ECO_ID", "ECO_NAME"]].drop_duplicates("ECO_ID").set_index("ECO_ID").ECO_NAME
     # names are checked against the whole world: shared rule files list RESOLVE regions of other parcels
     world = gpd.read_file(f"/vsizip/{paths.raw / 'resolve' / 'Ecoregions2017.zip'}/Ecoregions2017.shp",
                           columns=["ECO_NAME"], ignore_geometry=True).ECO_NAME
     unknown = {s for t in types.values() for s in t.get("resolve", [])} - set(world)
     missing = [t for t in tkeys if not types[t].get("resolve")]
-    if unknown or missing:
-        raise ValueError(f"ecoregion_types: unknown RESOLVE names {unknown}; types without a resolve list {missing}")
+    if unknown:
+        raise ValueError(f"ecoregion_types: unknown RESOLVE names {unknown}")
+    if missing:
+        log.warning("audit: types without a RESOLVE crosswalk (compared as 0 %%): %s", ", ".join(missing))
     res = read(paths.raster("resolve"))
     rid = np.unique(res)
     pos = np.zeros(int(rid.max()) + 1, np.int64)

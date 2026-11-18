@@ -155,7 +155,10 @@ def wild_plants(cfg, paths: Paths) -> pd.DataFrame:
     from .confirm import load_mask, role
 
     recs = recs[role(load_mask(cfg), recs.decimalLongitude, recs.decimalLatitude) == "development"]  # sealed records never read
-    return recs[~holdout(recs.decimalLongitude, recs.decimalLatitude, cfg["sources"]["gbif"]["cell_deg"])]
+    recs = recs[~holdout(recs.decimalLongitude, recs.decimalLatitude, cfg["sources"]["gbif"]["cell_deg"])]
+    from .native import screen
+
+    return screen(cfg, recs)  # native status in each record's botanical area
 
 
 def to_cells(rec: pd.DataFrame, grid: Grid) -> pd.DataFrame:

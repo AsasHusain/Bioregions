@@ -226,6 +226,9 @@ def local_plant_cells(cfg, paths: Paths, deg: float, roles=("development",)) -> 
 
     r = role(load_mask(cfg), recs.decimalLongitude.astype(float), recs.decimalLatitude.astype(float))
     recs = recs[np.isin(r, roles)]  # development only while a map is built; confirmation only when it is opened
+    from .native import screen
+
+    recs = screen(cfg, recs)  # native status in each record's botanical area, the same rule for every role
     i = np.floor(recs.decimalLongitude.astype(float) / deg).astype(int)
     j = np.floor(recs.decimalLatitude.astype(float) / deg).astype(int)
     cnt = recs.assign(i=i, j=j).groupby(["i", "j", "species"]).size()

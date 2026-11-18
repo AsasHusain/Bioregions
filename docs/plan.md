@@ -4,6 +4,12 @@ This plan is fixed before the first map of the atlas is built. Changes to it are
 [`ledger.md`](ledger.md), and the test rules are registered in [`preregistration.md`](preregistration.md) before any
 result is seen.
 
+## Purpose
+
+The atlas shows the natural communities of every place, including land that is now farmed or built on. For any
+site it gives the reference to restore toward: the natural vegetation expected there, the Biotic Region it belongs
+to, and the native plants and animals of that region, with the evidence behind each.
+
 ## Definition
 
 A Biotic Region is a connected area whose native plants and animals, taken together, form a community distinct from
@@ -12,12 +18,13 @@ a region: a small, coherent area with a distinctive native biota is eligible.
 
 The target is the native biota of the recent historical period, before modern land conversion:
 
-- **Plants:** records of species native to the region only, checked against the native ranges of the World
-  Checklist of Vascular Plants; planted and cultivated records are excluded.
+- **Plants:** records of species native where they were made, checked against the World Checklist of Vascular
+  Plants. A species native in a neighbouring botanical area within 100 km also counts as native, so status does not
+  change at a national border. Planted and cultivated records are excluded.
 - **Animals:** native ranges of mammals, birds, reptiles and amphibians, including ranges where a species is recently
   extinct (reported with and without them).
-- **Uncertain places:** cells where most land is converted, such as irrigated plains and oases, are flagged. There,
-  surviving records describe what remains, not the original community.
+- **Converted land:** the reference community is inferred from surviving natural analogues, environment and records,
+  and each cell states whether its community is observed or reconstructed.
 
 ## Evidence
 
@@ -30,13 +37,30 @@ national borders.
 | Animal composition | Range maps, with birds, mammals, and reptiles with amphibians weighted equally |
 | Vegetation mix | The share of each natural vegetation type around each cell, from the 90 m vegetation map |
 | Environment | Climate, terrain, soils and geology |
+| Land-surface seasonality | Multi-year satellite measures of green-up, peak and senescence, from natural ground only |
+| Canopy structure | Satellite lidar measures of canopy height and cover, as a check on forest, woodland and open types |
 
 The kinds of evidence overlap: the vegetation map and the plant model both draw on climate. They are therefore added
 in steps, starting from plants and animals alone, and each addition is kept only if it improves predictions on places
 not used to build the map.
 
+Satellite measures describe today's land surface, so they are read only from unconverted ground and never stand in
+for the reference community on converted land.
+
 Regions are grown on the grid's neighbour graph, so similarity is computed between neighbouring cells and to region
 centres, never between every pair of cells.
+
+## Continuity across borders
+
+Every input is checked for changes at national borders that the landscape does not show, and each is repaired at its
+source:
+
+| Source | Repair |
+|---|---|
+| Geology compiled country by country | One rock-type legend for all sheets; in border strips where sheets disagree, rock type is predicted from terrain and soils |
+| Native status by botanical area | Native in any botanical area within 100 km counts as native |
+| Range maps that stop at a border | Extended across the border within the species' elevation and habitat limits, checked against records on the far side |
+| Vegetation layer built in parts | Parts overlap and join along natural edges; any type change left at a border fails the build |
 
 ## Evidence support
 
