@@ -62,10 +62,39 @@ def check_settings(cfg, paths: Paths) -> list[str]:
     return out
 
 
+def shared_method(cfg) -> list[str]:
+    """Areas joined to each other (``world.joint_faunal``) must be built by one method: the same province list, rule
+    library, unit sizes and Faunal clustering, or the same ground is classified differently on each side of a seam."""
+    import json
+
+    from .communities import load_rules
+    from .config import load_config
+
+    group = cfg.get("world", {}).get("joint_faunal", [])
+    if cfg["_region"] not in group:
+        return []
+
+    def method(c):
+        rules = load_rules(Paths(c).root / c["communities"]["rules"])
+        return {"province list": c["provinces"]["units"], "unit sizes": c["segmentation"].get("unit_km2"),
+                "rule library": {k: rules.get(k) for k in ("communities", "ecoregion_types", "fallbacks")},
+                "Faunal clustering": [c["assemble"].get("faunal_k"), c["assemble"].get("faunal_group_k")]}
+
+    mine = method(cfg)
+    out = []
+    for r in group:
+        if r == cfg["_region"]:
+            continue
+        other = method(load_config(region=r))
+        out += [f"{k} differs from {r}'s: joined areas must share one method" for k in mine
+                if json.dumps(mine[k], sort_keys=True, default=str) != json.dumps(other[k], sort_keys=True, default=str)]
+    return out
+
+
 def run(cfg) -> None:
     paths = Paths(cfg)
     problems = (check_seeds(cfg["provinces"]["units"], cfg["provinces"].get("seed_link_km", 400)) + check_tiles(cfg, paths)
-                + check_settings(cfg, paths))
+                + check_settings(cfg, paths) + shared_method(cfg))
     for p in problems:
         log.error("preflight: %s", p)
     if problems:

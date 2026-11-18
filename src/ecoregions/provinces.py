@@ -175,6 +175,10 @@ def seed_cells(units, grid: Grid, valid: np.ndarray, drop_outside: bool = False)
 
 
 def run(cfg) -> None:
+    from .preflight import shared_method
+
+    if problems := shared_method(cfg):  # every rebuild starts here: joined areas may not drift apart
+        raise SystemExit("provinces: " + "; ".join(problems))
     paths = Paths(cfg)
     pc = cfg["provinces"]
     grid90 = Grid.load(paths.grid_json)
