@@ -382,6 +382,26 @@ plots:                          # confirmatory vegetation-plot tests (plots stag
   map_sha256: null              # the frozen map's hash, set in the region file before the plots are opened
 
 # ---------------------------------------------------------------------------
+# Fit check (fitcheck stage, 2026-11-17): each type's outline against the landscape evidence for it, on natural
+# ground, against a ring around it; a rebuild may not fit a type worse than the published map by more than max_drop.
+# A quality gate, not validation (the Landsat layers are also inputs).
+# ---------------------------------------------------------------------------
+fitcheck:
+  ring_km: 10
+  max_drop: 0.05
+  published:
+    pak-afg-irn: outputs/pak-afg-irn/ecoregions.gpkg.zip
+    central-asia: outputs/central-asia/ecoregions.gpkg.zip
+  families:
+    sand: {layer: ls_bare, types: [thal, thar_cholistan, amu_darya, chagai_kharan, helmand, lut_desert]}
+    salt_and_ice: {layer: ls_bright, types: [turan_halophyte, kavir_desert, ice]}
+    floodplain: {layer: hand, lower: true, types: [riverine, tugai, hyrcanian_lowland, mesopotamian_marshes]}
+    forest: {layer: ls_green, types: [chir, moist_temperate, sulaiman_temperate, northern_dry_temperate, siwalik,
+                                      hyrcanian_montane, arasbaran, zagros_oak, walnut_fruit, tienshan_spruce, euxine,
+                                      euxine_conifer, north_anatolian, balkan, caucasus_broadleaf, med_pine,
+                                      taurus_conifer]}
+
+# ---------------------------------------------------------------------------
 # World merge (`python -m ecoregions.world`): the published areas as one map; units of one type that meet across a
 # seam become one unit. An area joins the list when it is published.
 # ---------------------------------------------------------------------------

@@ -21,6 +21,7 @@ STAGES = {
     "hydro": "ecoregions.hydro",
     "covariates": "ecoregions.covariates",
     "landsat": "ecoregions.landsat",
+    "fitcheck": "ecoregions.fitcheck",
     "features": "ecoregions.features",
     "provinces": "ecoregions.provinces",
     "segment": "ecoregions.segment",
